@@ -1359,6 +1359,11 @@
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
           if (event === 'SIGNED_IN' && session) {
             await checkUser();
+            
+            // Solicitar permiso para notificaciones después del login
+            if ('Notification' in window && Notification.permission === 'default') {
+              Notification.requestPermission();
+            }
           } else if (event === 'SIGNED_OUT') {
             setUser(null);
             setUsuarioActual(null);
@@ -1738,10 +1743,8 @@
       );
     }
 
-    // Solicitar permiso para notificaciones
-    if ('Notification' in window && Notification.permission === 'default') {
-      Notification.requestPermission();
-    }
+    // Las notificaciones se solicitarán cuando el usuario haga login
+    // (el permiso se debe pedir con interacción del usuario)
 
     ReactDOM.render(<App />, document.getElementById('root'));
   </script>
