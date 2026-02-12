@@ -1345,10 +1345,15 @@
       useEffect(() => {
         // Verificar si hay sesión guardada
         const checkSession = async () => {
-          const { data: { session } } = await supabase.auth.getSession();
-          if (session) {
-            await checkUser();
-          } else {
+          try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+              await checkUser();
+            } else {
+              setLoading(false);
+            }
+          } catch (error) {
+            console.error('Error en checkSession:', error);
             setLoading(false);
           }
         };
@@ -1385,10 +1390,10 @@
 
       const checkUser = async () => {
         try {
-          const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+          const { data: { session } } = await supabase.auth.getSession();
           
-          if (sessionError || !session) {
-            console.error('No hay sesión activa:', sessionError);
+          if (!session || !session.user) {
+            console.log('No hay sesión activa');
             setLoading(false);
             return;
           }
@@ -1396,26 +1401,25 @@
           const user = session.user;
           setUser(user);
           
-          console.log('Usuario auth ID:', user.id);
-          console.log('Usuario auth email:', user.email);
-          
-          // Obtener información adicional del usuario desde la tabla usuarios
-          const { data: usuarioData, error: dbError } = await supabase
+          // Obtener información del usuario desde la tabla
+          const { data: usuarioData, error } = await supabase
             .from('usuarios')
             .select('*')
             .eq('id', user.id)
             .single();
           
-          if (dbError) {
-            console.error('Error al obtener usuario de BD:', dbError);
+          if (error) {
+            console.error('Error BD:', error.message);
+            // Aunque haya error, permitir continuar
+            setUsuarioActual(null);
           } else {
-            console.log('Datos del usuario desde BD:', usuarioData);
+            console.log('Usuario cargado:', usuarioData?.username, 'Rol:', usuarioData?.rol);
             setUsuarioActual(usuarioData);
           }
-          
-          setLoading(false);
         } catch (err) {
-          console.error('Error en checkUser:', err);
+          console.error('Error general:', err.message);
+        } finally {
+          // SIEMPRE ejecutar esto, pase lo que pase
           setLoading(false);
         }
       };
