@@ -1354,21 +1354,41 @@
       }, [user, vistaActual]);
 
       const checkUser = async () => {
-        const { data: { user } } = await supabase.auth.getUser();
-        setUser(user);
-        
-        if (user) {
-          // Obtener información adicional del usuario desde la tabla usuarios
-          const { data: usuarioData } = await supabase
-            .from('usuarios')
-            .select('*')
-            .eq('id', user.id)
-            .single();
+        try {
+          const { data: { user }, error: authError } = await supabase.auth.getUser();
           
-          setUsuarioActual(usuarioData);
+          if (authError) {
+            console.error('Error en auth.getUser:', authError);
+            setLoading(false);
+            return;
+          }
+          
+          setUser(user);
+          
+          if (user) {
+            console.log('Usuario auth ID:', user.id);
+            console.log('Usuario auth email:', user.email);
+            
+            // Obtener información adicional del usuario desde la tabla usuarios
+            const { data: usuarioData, error: dbError } = await supabase
+              .from('usuarios')
+              .select('*')
+              .eq('id', user.id)
+              .single();
+            
+            if (dbError) {
+              console.error('Error al obtener usuario de BD:', dbError);
+            } else {
+              console.log('Datos del usuario desde BD:', usuarioData);
+              setUsuarioActual(usuarioData);
+            }
+          }
+          
+          setLoading(false);
+        } catch (err) {
+          console.error('Error en checkUser:', err);
+          setLoading(false);
         }
-        
-        setLoading(false);
       };
 
       const cargarDatos = async () => {
