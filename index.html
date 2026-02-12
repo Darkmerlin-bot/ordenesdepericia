@@ -630,7 +630,7 @@
     // ============================================
     // COMPONENTE DE LOGIN
     // ============================================
-    function Login({ onLogin }) {
+    function Login() {
       const [username, setUsername] = useState('');
       const [password, setPassword] = useState('');
       const [loading, setLoading] = useState(false);
@@ -664,10 +664,11 @@
           });
 
           if (error) throw error;
-          onLogin(data.user);
+          
+          // La sesión se guardará automáticamente y onAuthStateChange se encargará del resto
+          // No necesitamos llamar a onLogin aquí
         } catch (err) {
           setError(err.message);
-        } finally {
           setLoading(false);
         }
       };
@@ -1342,46 +1343,69 @@
       const [stats, setStats] = useState({ total: 0, pendientes: 0, enProceso: 0, contestadas: 0 });
 
       useEffect(() => {
-        checkUser();
+        // Verificar si hay sesión guardada
+        const checkSession = async () => {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session) {
+            await checkUser();
+          } else {
+            setLoading(false);
+          }
+        };
+        
+        checkSession();
+        
+        // Escuchar cambios en la autenticación
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+          if (event === 'SIGNED_IN' && session) {
+            await checkUser();
+          } else if (event === 'SIGNED_OUT') {
+            setUser(null);
+            setUsuarioActual(null);
+          }
+        });
+        
+        return () => {
+          subscription.unsubscribe();
+        };
       }, []);
 
       useEffect(() => {
-        if (user) {
+        if (user && usuarioActual) {
           cargarDatos();
           const interval = setInterval(cargarDatos, 30000); // Actualizar cada 30 segundos
           return () => clearInterval(interval);
         }
-      }, [user, vistaActual]);
+      }, [user, usuarioActual, vistaActual]);
 
       const checkUser = async () => {
         try {
-          const { data: { user }, error: authError } = await supabase.auth.getUser();
+          const { data: { session }, error: sessionError } = await supabase.auth.getSession();
           
-          if (authError) {
-            console.error('Error en auth.getUser:', authError);
+          if (sessionError || !session) {
+            console.error('No hay sesión activa:', sessionError);
             setLoading(false);
             return;
           }
           
+          const user = session.user;
           setUser(user);
           
-          if (user) {
-            console.log('Usuario auth ID:', user.id);
-            console.log('Usuario auth email:', user.email);
-            
-            // Obtener información adicional del usuario desde la tabla usuarios
-            const { data: usuarioData, error: dbError } = await supabase
-              .from('usuarios')
-              .select('*')
-              .eq('id', user.id)
-              .single();
-            
-            if (dbError) {
-              console.error('Error al obtener usuario de BD:', dbError);
-            } else {
-              console.log('Datos del usuario desde BD:', usuarioData);
-              setUsuarioActual(usuarioData);
-            }
+          console.log('Usuario auth ID:', user.id);
+          console.log('Usuario auth email:', user.email);
+          
+          // Obtener información adicional del usuario desde la tabla usuarios
+          const { data: usuarioData, error: dbError } = await supabase
+            .from('usuarios')
+            .select('*')
+            .eq('id', user.id)
+            .single();
+          
+          if (dbError) {
+            console.error('Error al obtener usuario de BD:', dbError);
+          } else {
+            console.log('Datos del usuario desde BD:', usuarioData);
+            setUsuarioActual(usuarioData);
           }
           
           setLoading(false);
@@ -1531,7 +1555,7 @@
       }
 
       if (!user) {
-        return <Login onLogin={setUser} />;
+        return <Login />;
       }
 
       return (
