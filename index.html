@@ -62,7 +62,7 @@
       font-size: 14px;
     }
 
-    .user-badge.admin {
+    .user-badge.administrador {
       background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
     }
 
@@ -100,6 +100,11 @@
     .btn-secondary {
       background: #e2e8f0;
       color: #4a5568;
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+      color: white;
     }
 
     .btn:hover {
@@ -300,59 +305,116 @@
       50% { opacity: 0.7; }
     }
 
-    .usuarios-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 10px;
-      max-height: 300px;
-      overflow-y: auto;
-      padding: 10px;
-      border: 1px solid #e2e8f0;
+    /* NUEVA UI DE SELECCIÓN DE USUARIOS */
+    .usuarios-selector {
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 20px;
+      background: #f7fafc;
+    }
+
+    .usuarios-search {
+      margin-bottom: 15px;
+    }
+
+    .usuarios-search input {
+      width: 100%;
+      padding: 10px 15px;
+      border: 2px solid #cbd5e0;
       border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .usuarios-search input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .usuarios-stats {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      background: white;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      font-weight: 600;
+      color: #4a5568;
+    }
+
+    .usuarios-por-turno {
+      display: grid;
+      gap: 15px;
+    }
+
+    .turno-group {
+      background: white;
+      border-radius: 10px;
+      padding: 15px;
+      border: 2px solid #e2e8f0;
+    }
+
+    .turno-header {
+      font-weight: 700;
+      color: #2d3748;
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .turno-header .badge {
+      font-size: 11px;
+    }
+
+    .usuarios-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 8px;
+      margin-top: 10px;
     }
 
     .usuario-checkbox {
       display: flex;
       align-items: center;
       gap: 8px;
-      padding: 8px;
+      padding: 8px 12px;
       border-radius: 6px;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: all 0.2s;
+      background: #f7fafc;
+      border: 1px solid #e2e8f0;
     }
 
     .usuario-checkbox:hover {
-      background: #f7fafc;
+      background: #edf2f7;
+      border-color: #cbd5e0;
+    }
+
+    .usuario-checkbox.selected {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-color: #667eea;
     }
 
     .usuario-checkbox input {
       cursor: pointer;
     }
 
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-      margin-bottom: 20px;
+    .select-all-turno {
+      font-size: 12px;
+      padding: 4px 8px;
+      background: transparent;
+      border: 1px solid #cbd5e0;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
     }
 
-    .stat-card {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-
-    .stat-value {
-      font-size: 32px;
-      font-weight: 700;
-      margin-bottom: 5px;
-    }
-
-    .stat-label {
-      font-size: 14px;
-      opacity: 0.9;
+    .select-all-turno:hover {
+      background: #edf2f7;
     }
 
     .filters {
@@ -378,13 +440,72 @@
       margin-bottom: 20px;
       opacity: 0.5;
     }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 15px;
+      max-width: 600px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 30px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    .modal-header h3 {
+      font-size: 20px;
+      color: #2d3748;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #718096;
+      padding: 0;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.2s;
+    }
+
+    .close-btn:hover {
+      background: #edf2f7;
+      color: #2d3748;
+    }
   </style>
 </head>
 <body>
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useEffect } = React;
+    const { useState, useEffect, useMemo } = React;
 
     const SUPABASE_URL = 'https://dhpwdkysrjjsagtiqwmz.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRocHdka3lzcmpqc2FndGlxd216Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5MDcwMTMsImV4cCI6MjA4NjQ4MzAxM30.L4j6986BRq7ghpleZFh3GJqt5MfaMsRBwTDP3Ubhm90';
@@ -467,6 +588,271 @@
       );
     }
 
+    // NUEVO: Componente Selector de Usuarios Mejorado
+    function SelectorUsuarios({ usuarios, usuariosSeleccionados, onChange }) {
+      const [busqueda, setBusqueda] = useState('');
+
+      const usuariosFiltrados = useMemo(() => {
+        if (!busqueda) return usuarios;
+        return usuarios.filter(u => 
+          u.nombre_completo.toLowerCase().includes(busqueda.toLowerCase()) ||
+          u.username.toLowerCase().includes(busqueda.toLowerCase())
+        );
+      }, [usuarios, busqueda]);
+
+      const usuariosPorTurno = useMemo(() => {
+        const grupos = {
+          '1er Turno': [],
+          '2do Turno': [],
+          '3er Turno': [],
+          'Sin Turno': []
+        };
+
+        usuariosFiltrados.forEach(usuario => {
+          const turno = usuario.turno || 'Sin Turno';
+          if (grupos[turno]) {
+            grupos[turno].push(usuario);
+          }
+        });
+
+        return grupos;
+      }, [usuariosFiltrados]);
+
+      const toggleUsuario = (userId) => {
+        const nuevosSeleccionados = usuariosSeleccionados.includes(userId)
+          ? usuariosSeleccionados.filter(id => id !== userId)
+          : [...usuariosSeleccionados, userId];
+        onChange(nuevosSeleccionados);
+      };
+
+      const seleccionarTodosTurno = (turno) => {
+        const usuariosTurno = usuariosPorTurno[turno].map(u => u.id);
+        const todosSeleccionados = usuariosTurno.every(id => usuariosSeleccionados.includes(id));
+        
+        if (todosSeleccionados) {
+          onChange(usuariosSeleccionados.filter(id => !usuariosTurno.includes(id)));
+        } else {
+          const nuevos = [...new Set([...usuariosSeleccionados, ...usuariosTurno])];
+          onChange(nuevos);
+        }
+      };
+
+      return (
+        <div className="usuarios-selector">
+          <div className="usuarios-search">
+            <input
+              type="text"
+              placeholder="🔍 Buscar usuario por nombre..."
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+            />
+          </div>
+
+          <div className="usuarios-stats">
+            <span>👥 {usuariosSeleccionados.length} usuario(s) seleccionado(s)</span>
+            <button 
+              type="button"
+              className="btn btn-secondary"
+              style={{fontSize: '12px', padding: '6px 12px'}}
+              onClick={() => onChange([])}
+            >
+              Limpiar selección
+            </button>
+          </div>
+
+          <div className="usuarios-por-turno">
+            {Object.entries(usuariosPorTurno).map(([turno, usuariosTurno]) => {
+              if (usuariosTurno.length === 0) return null;
+
+              const todosSeleccionados = usuariosTurno.every(u => usuariosSeleccionados.includes(u.id));
+              const algunosSeleccionados = usuariosTurno.some(u => usuariosSeleccionados.includes(u.id));
+
+              return (
+                <div key={turno} className="turno-group">
+                  <div className="turno-header">
+                    <span>
+                      {turno === '1er Turno' && '🌅'} 
+                      {turno === '2do Turno' && '☀️'} 
+                      {turno === '3er Turno' && '🌙'}
+                      {turno === 'Sin Turno' && '👥'}
+                      {' '}{turno}
+                    </span>
+                    <div style={{display: 'flex', gap: '8px', alignItems: 'center'}}>
+                      <span className="badge">
+                        {usuariosTurno.filter(u => usuariosSeleccionados.includes(u.id)).length} / {usuariosTurno.length}
+                      </span>
+                      <button
+                        type="button"
+                        className="select-all-turno"
+                        onClick={() => seleccionarTodosTurno(turno)}
+                      >
+                        {todosSeleccionados ? '✓ Todos' : algunosSeleccionados ? '◐ Algunos' : 'Seleccionar todos'}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="usuarios-grid">
+                    {usuariosTurno.map(usuario => (
+                      <label 
+                        key={usuario.id} 
+                        className={`usuario-checkbox ${usuariosSeleccionados.includes(usuario.id) ? 'selected' : ''}`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={usuariosSeleccionados.includes(usuario.id)}
+                          onChange={() => toggleUsuario(usuario.id)}
+                          style={{display: 'none'}}
+                        />
+                        <span style={{fontSize: '12px', fontWeight: '500'}}>
+                          {usuario.nombre_completo}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
+
+    // NUEVO: Modal para Editar Usuario
+    function ModalEditarUsuario({ usuario, onClose, onGuardar }) {
+      const [rol, setRol] = useState(usuario.rol);
+      const [turno, setTurno] = useState(usuario.turno || '');
+      const [activo, setActivo] = useState(usuario.activo);
+      const [loading, setLoading] = useState(false);
+      const [error, setError] = useState('');
+
+      const handleGuardar = async () => {
+        setLoading(true);
+        setError('');
+
+        try {
+          // Validación: admin y supervisor no deben tener turno
+          const turnoFinal = ['administrador', 'supervisor'].includes(rol) ? null : turno || null;
+
+          const { error: updateError } = await supabase
+            .from('usuarios')
+            .update({
+              rol: rol,
+              turno: turnoFinal,
+              activo: activo
+            })
+            .eq('id', usuario.id);
+
+          if (updateError) throw updateError;
+
+          onGuardar();
+        } catch (err) {
+          setError(err.message);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      const esAdminOSupervisor = ['administrador', 'supervisor'].includes(rol);
+
+      return (
+        <div className="modal-overlay" onClick={onClose}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>✏️ Editar Usuario</h3>
+              <button className="close-btn" onClick={onClose}>×</button>
+            </div>
+
+            {error && <div className="alert alert-error">{error}</div>}
+
+            <div className="form-group">
+              <label className="form-label">Usuario</label>
+              <input
+                type="text"
+                className="form-control"
+                value={usuario.username}
+                disabled
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Nombre Completo</label>
+              <input
+                type="text"
+                className="form-control"
+                value={usuario.nombre_completo}
+                disabled
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Rol</label>
+              <select
+                className="form-control"
+                value={rol}
+                onChange={(e) => setRol(e.target.value)}
+              >
+                <option value="administrador">👑 Administrador</option>
+                <option value="supervisor">👁️ Supervisor</option>
+                <option value="encargado">🎖️ Encargado</option>
+                <option value="usuario">👤 Usuario</option>
+              </select>
+            </div>
+
+            {!esAdminOSupervisor && (
+              <div className="form-group">
+                <label className="form-label">Turno</label>
+                <select
+                  className="form-control"
+                  value={turno}
+                  onChange={(e) => setTurno(e.target.value)}
+                >
+                  <option value="">Seleccionar turno...</option>
+                  <option value="1er Turno">🌅 1er Turno</option>
+                  <option value="2do Turno">☀️ 2do Turno</option>
+                  <option value="3er Turno">🌙 3er Turno</option>
+                </select>
+              </div>
+            )}
+
+            {esAdminOSupervisor && (
+              <div className="alert" style={{background: '#bee3f8', color: '#2c5282', border: 'none'}}>
+                ℹ️ Administradores y Supervisores no tienen turno asignado (ven todos los turnos)
+              </div>
+            )}
+
+            <div className="form-group">
+              <label style={{display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer'}}>
+                <input
+                  type="checkbox"
+                  checked={activo}
+                  onChange={(e) => setActivo(e.target.checked)}
+                  style={{width: 'auto', cursor: 'pointer'}}
+                />
+                <span className="form-label" style={{marginBottom: 0}}>Usuario Activo</span>
+              </label>
+            </div>
+
+            <div style={{display: 'flex', gap: '10px', marginTop: '20px'}}>
+              <button 
+                className="btn btn-success" 
+                onClick={handleGuardar}
+                disabled={loading}
+                style={{flex: 1}}
+              >
+                {loading ? 'Guardando...' : '💾 Guardar Cambios'}
+              </button>
+              <button 
+                className="btn btn-secondary" 
+                onClick={onClose}
+                disabled={loading}
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     // Componente Principal
     function App() {
       const [user, setUser] = useState(null);
@@ -475,21 +861,18 @@
       const [vistaActual, setVistaActual] = useState('pendientes');
       const [pericias, setPericias] = useState([]);
       const [usuarios, setUsuarios] = useState([]);
-      const [auditLog, setAuditLog] = useState([]);
       const [filtroTurno, setFiltroTurno] = useState('todos');
 
       useEffect(() => {
-        console.log('🔵 1. Inicializando app...');
+        console.log('🔵 Inicializando...');
         
-        // Intentar cargar usuario desde caché
         const cachedUser = localStorage.getItem('usuarioActual');
         if (cachedUser) {
           try {
             const parsed = JSON.parse(cachedUser);
-            console.log('📦 Usuario cargado desde caché:', parsed.username);
+            console.log('📦 Usuario desde caché:', parsed.username);
             setUsuarioActual(parsed);
           } catch (e) {
-            console.log('⚠️ Error al parsear caché, limpiando...');
             localStorage.removeItem('usuarioActual');
           }
         }
@@ -499,7 +882,6 @@
             const { data: { session } } = await supabase.auth.getSession();
             
             if (session?.user) {
-              console.log('✅ Sesión activa encontrada');
               setUser(session.user);
               
               const { data: userData } = await supabase
@@ -509,13 +891,13 @@
                 .maybeSingle();
               
               if (userData) {
-                console.log('✅ Usuario cargado:', userData.username, userData.rol);
+                console.log('✅ Usuario:', userData.username, userData.rol);
                 setUsuarioActual(userData);
                 localStorage.setItem('usuarioActual', JSON.stringify(userData));
               }
             }
           } catch (error) {
-            console.error('❌ Error al inicializar:', error);
+            console.error('❌ Error:', error);
           } finally {
             setLoading(false);
           }
@@ -524,8 +906,6 @@
         init();
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-          console.log('🔵 AUTH EVENT:', event);
-          
           if (event === 'SIGNED_IN' && session?.user) {
             setUser(session.user);
             
@@ -557,7 +937,6 @@
 
       const cargarDatos = async () => {
         try {
-          // Cargar pericias según vista
           let query = supabase.from('pericias').select(`
             *,
             creador:usuarios!pericias_creado_por_fkey(nombre_completo),
@@ -565,18 +944,15 @@
             contestaciones(id, usuario_id)
           `);
 
-          // Filtrar por estado
           if (vistaActual === 'pendientes') {
             query = query.in('estado', ['pendiente', 'en_proceso']);
           } else if (vistaActual === 'contestadas') {
             query = query.eq('estado', 'contestada');
           }
 
-          // Filtrar por turno según rol
           if (usuarioActual.rol === 'encargado' && usuarioActual.turno) {
             query = query.eq('turno', usuarioActual.turno);
           } else if (usuarioActual.rol === 'usuario') {
-            // Usuarios solo ven las asignadas a ellos
             const { data: misAsignaciones } = await supabase
               .from('asignaciones')
               .select('pericia_id')
@@ -586,7 +962,6 @@
             query = query.in('id', periciaIds.length > 0 ? periciaIds : ['00000000-0000-0000-0000-000000000000']);
           }
 
-          // Filtro adicional de turno (para admin y supervisor)
           if (filtroTurno !== 'todos' && ['administrador', 'supervisor'].includes(usuarioActual.rol)) {
             query = query.eq('turno', filtroTurno);
           }
@@ -594,7 +969,6 @@
           const { data: periciasData } = await query.order('created_at', { ascending: false });
           setPericias(periciasData || []);
 
-          // Cargar usuarios
           if (['administrador', 'supervisor', 'encargado'].includes(usuarioActual.rol)) {
             const { data: usuariosData } = await supabase
               .from('usuarios')
@@ -604,18 +978,8 @@
             setUsuarios(usuariosData || []);
           }
 
-          // Cargar auditoría (solo admin)
-          if (usuarioActual.rol === 'administrador' && vistaActual === 'auditoria') {
-            const { data: auditData } = await supabase
-              .from('audit_log')
-              .select('*, usuarios(nombre_completo)')
-              .order('created_at', { ascending: false })
-              .limit(100);
-            setAuditLog(auditData || []);
-          }
-
         } catch (error) {
-          console.error('Error al cargar datos:', error);
+          console.error('Error al cargar:', error);
         }
       };
 
@@ -626,7 +990,7 @@
       };
 
       const handleBorrarPericia = async (periciaId) => {
-        if (!confirm('¿Está seguro de borrar esta pericia? Esta acción quedará registrada en la auditoría.')) {
+        if (!confirm('¿Seguro de borrar esta pericia? Quedará en auditoría.')) {
           return;
         }
 
@@ -638,10 +1002,10 @@
 
           if (error) throw error;
 
-          alert('Pericia borrada exitosamente');
+          alert('Pericia borrada');
           cargarDatos();
         } catch (error) {
-          alert('Error al borrar pericia: ' + error.message);
+          alert('Error: ' + error.message);
         }
       };
 
@@ -649,7 +1013,7 @@
         return (
           <div className="loading">
             <div className="spinner"></div>
-            Cargando sistema...
+            Cargando...
           </div>
         );
       }
@@ -660,7 +1024,6 @@
 
       const esAdmin = usuarioActual.rol === 'administrador';
       const esSupervisor = usuarioActual.rol === 'supervisor';
-      const esEncargado = usuarioActual.rol === 'encargado';
 
       return (
         <div className="container">
@@ -683,75 +1046,39 @@
           </div>
 
           <div className="tabs">
-            <div
-              className={`tab ${vistaActual === 'pendientes' ? 'active' : ''}`}
-              onClick={() => setVistaActual('pendientes')}
-            >
+            <div className={`tab ${vistaActual === 'pendientes' ? 'active' : ''}`} onClick={() => setVistaActual('pendientes')}>
               📥 Pendientes
             </div>
-            <div
-              className={`tab ${vistaActual === 'contestadas' ? 'active' : ''}`}
-              onClick={() => setVistaActual('contestadas')}
-            >
+            <div className={`tab ${vistaActual === 'contestadas' ? 'active' : ''}`} onClick={() => setVistaActual('contestadas')}>
               ✅ Contestadas
             </div>
-            <div
-              className={`tab ${vistaActual === 'nueva' ? 'active' : ''}`}
-              onClick={() => setVistaActual('nueva')}
-            >
+            <div className={`tab ${vistaActual === 'nueva' ? 'active' : ''}`} onClick={() => setVistaActual('nueva')}>
               ➕ Nueva Pericia
             </div>
             {(esAdmin || esSupervisor) && (
-              <div
-                className={`tab ${vistaActual === 'todas' ? 'active' : ''}`}
-                onClick={() => setVistaActual('todas')}
-              >
-                📊 Todas las Pericias
+              <div className={`tab ${vistaActual === 'todas' ? 'active' : ''}`} onClick={() => setVistaActual('todas')}>
+                📊 Todas
               </div>
             )}
             {esAdmin && (
-              <>
-                <div
-                  className={`tab ${vistaActual === 'usuarios' ? 'active' : ''}`}
-                  onClick={() => setVistaActual('usuarios')}
-                >
-                  👥 Gestión de Usuarios
-                </div>
-                <div
-                  className={`tab ${vistaActual === 'auditoria' ? 'active' : ''}`}
-                  onClick={() => setVistaActual('auditoria')}
-                >
-                  📋 Auditoría
-                </div>
-              </>
+              <div className={`tab ${vistaActual === 'usuarios' ? 'active' : ''}`} onClick={() => setVistaActual('usuarios')}>
+                👥 Usuarios
+              </div>
             )}
           </div>
 
           {(esAdmin || esSupervisor) && ['pendientes', 'contestadas', 'todas'].includes(vistaActual) && (
             <div className="filters">
-              <select
-                className="form-control"
-                value={filtroTurno}
-                onChange={(e) => setFiltroTurno(e.target.value)}
-              >
+              <select className="form-control" value={filtroTurno} onChange={(e) => setFiltroTurno(e.target.value)}>
                 <option value="todos">Todos los turnos</option>
-                <option value="1er Turno">1er Turno</option>
-                <option value="2do Turno">2do Turno</option>
-                <option value="3er Turno">3er Turno</option>
+                <option value="1er Turno">🌅 1er Turno</option>
+                <option value="2do Turno">☀️ 2do Turno</option>
+                <option value="3er Turno">🌙 3er Turno</option>
               </select>
             </div>
           )}
 
-          {vistaActual === 'pendientes' && (
-            <ListaPericias
-              pericias={pericias}
-              usuarioActual={usuarioActual}
-              onRecargar={cargarDatos}
-              onBorrar={esAdmin ? handleBorrarPericia : null}
-            />
-          )}
-
-          {vistaActual === 'contestadas' && (
+          {['pendientes', 'contestadas', 'todas'].includes(vistaActual) && (
             <ListaPericias
               pericias={pericias}
               usuarioActual={usuarioActual}
@@ -771,36 +1098,21 @@
             />
           )}
 
-          {vistaActual === 'todas' && (
-            <ListaPericias
-              pericias={pericias}
-              usuarioActual={usuarioActual}
-              onRecargar={cargarDatos}
-              onBorrar={esAdmin ? handleBorrarPericia : null}
-            />
-          )}
-
           {vistaActual === 'usuarios' && esAdmin && (
             <GestionUsuarios usuarios={usuarios} onRecargar={cargarDatos} />
-          )}
-
-          {vistaActual === 'auditoria' && esAdmin && (
-            <Auditoria logs={auditLog} />
           )}
         </div>
       );
     }
 
-    // Componente Lista de Pericias
+    // Lista de Pericias
     function ListaPericias({ pericias, usuarioActual, onRecargar, onBorrar }) {
-      const [periciaSeleccionada, setPericiaSeleccionada] = useState(null);
-
       if (pericias.length === 0) {
         return (
           <div className="card">
             <div className="empty-state">
               <div className="empty-state-icon">📭</div>
-              <h3>No hay pericias en esta categoría</h3>
+              <h3>No hay pericias</h3>
             </div>
           </div>
         );
@@ -829,7 +1141,14 @@
                   return (
                     <tr key={pericia.id}>
                       <td><strong>{pericia.numero_sgsp}</strong></td>
-                      <td><span className="badge">{pericia.turno}</span></td>
+                      <td>
+                        <span className="badge">
+                          {pericia.turno === '1er Turno' && '🌅'} 
+                          {pericia.turno === '2do Turno' && '☀️'} 
+                          {pericia.turno === '3er Turno' && '🌙'}
+                          {' '}{pericia.turno}
+                        </span>
+                      </td>
                       <td>{new Date(pericia.fecha).toLocaleDateString()}</td>
                       <td>{pericia.pericia_solicitada.substring(0, 50)}...</td>
                       <td>
@@ -842,20 +1161,9 @@
                         </span>
                       </td>
                       <td>
-                        <button
-                          className="btn btn-primary"
-                          style={{fontSize: '12px', padding: '6px 12px'}}
-                          onClick={() => setPericiaSeleccionada(pericia)}
-                        >
-                          Ver Detalle
-                        </button>
                         {onBorrar && (
-                          <button
-                            className="btn btn-danger"
-                            style={{fontSize: '12px', padding: '6px 12px', marginLeft: '8px'}}
-                            onClick={() => onBorrar(pericia.id)}
-                          >
-                            🗑️ Borrar
+                          <button className="btn btn-danger" style={{fontSize: '12px', padding: '6px 12px'}} onClick={() => onBorrar(pericia.id)}>
+                            🗑️
                           </button>
                         )}
                       </td>
@@ -865,22 +1173,11 @@
               </tbody>
             </table>
           </div>
-
-          {periciaSeleccionada && (
-            <DetallePericia
-              pericia={periciaSeleccionada}
-              usuarioActual={usuarioActual}
-              onClose={() => {
-                setPericiaSeleccionada(null);
-                onRecargar();
-              }}
-            />
-          )}
         </div>
       );
     }
 
-    // Componente Formulario de Pericia
+    // Formulario de Pericia
     function FormularioPericia({ usuarios, usuarioActual, onSuccess }) {
       const [loading, setLoading] = useState(false);
       const [error, setError] = useState('');
@@ -898,6 +1195,7 @@
 
       const handleSubmit = async (e) => {
         e.preventDefault();
+        console.log('📝 Iniciando creación...');
         setLoading(true);
         setError('');
 
@@ -909,6 +1207,7 @@
 
         try {
           const { data: { user } } = await supabase.auth.getUser();
+          console.log('📝 Usuario:', user.id);
 
           const { data: pericia, error: periciaError } = await supabase
             .from('pericias')
@@ -926,7 +1225,12 @@
             .select()
             .single();
 
-          if (periciaError) throw periciaError;
+          if (periciaError) {
+            console.error('❌ Error pericia:', periciaError);
+            throw periciaError;
+          }
+
+          console.log('✅ Pericia creada:', pericia.id);
 
           const asignaciones = formData.usuarios_asignados.map(userId => ({
             pericia_id: pericia.id,
@@ -937,24 +1241,20 @@
             .from('asignaciones')
             .insert(asignaciones);
 
-          if (asignacionError) throw asignacionError;
+          if (asignacionError) {
+            console.error('❌ Error asignaciones:', asignacionError);
+            throw asignacionError;
+          }
 
+          console.log('✅ Asignaciones creadas');
           alert('Pericia creada exitosamente');
           onSuccess();
         } catch (err) {
-          setError(err.message);
+          console.error('❌ ERROR:', err);
+          setError('Error: ' + err.message);
         } finally {
           setLoading(false);
         }
-      };
-
-      const toggleUsuario = (userId) => {
-        setFormData(prev => ({
-          ...prev,
-          usuarios_asignados: prev.usuarios_asignados.includes(userId)
-            ? prev.usuarios_asignados.filter(id => id !== userId)
-            : [...prev.usuarios_asignados, userId]
-        }));
       };
 
       return (
@@ -966,148 +1266,68 @@
             <div className="form-row">
               <div className="form-group">
                 <label className="form-label">Fecha</label>
-                <input
-                  type="date"
-                  className="form-control"
-                  value={formData.fecha}
-                  onChange={(e) => setFormData({...formData, fecha: e.target.value})}
-                  required
-                />
+                <input type="date" className="form-control" value={formData.fecha} onChange={(e) => setFormData({...formData, fecha: e.target.value})} required />
               </div>
               <div className="form-group">
                 <label className="form-label">Hora</label>
-                <input
-                  type="time"
-                  className="form-control"
-                  value={formData.hora}
-                  onChange={(e) => setFormData({...formData, hora: e.target.value})}
-                  required
-                />
+                <input type="time" className="form-control" value={formData.hora} onChange={(e) => setFormData({...formData, hora: e.target.value})} required />
               </div>
               <div className="form-group">
                 <label className="form-label">Número SGSP</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={formData.numero_sgsp}
-                  onChange={(e) => setFormData({...formData, numero_sgsp: e.target.value})}
-                  required
-                />
+                <input type="text" className="form-control" value={formData.numero_sgsp} onChange={(e) => setFormData({...formData, numero_sgsp: e.target.value})} required />
               </div>
             </div>
 
             <div className="form-row">
               <div className="form-group">
                 <label className="form-label">Turno</label>
-                <select
-                  className="form-control"
-                  value={formData.turno}
-                  onChange={(e) => setFormData({...formData, turno: e.target.value})}
-                  required
-                >
-                  <option value="1er Turno">1er Turno</option>
-                  <option value="2do Turno">2do Turno</option>
-                  <option value="3er Turno">3er Turno</option>
+                <select className="form-control" value={formData.turno} onChange={(e) => setFormData({...formData, turno: e.target.value})} required>
+                  <option value="1er Turno">🌅 1er Turno</option>
+                  <option value="2do Turno">☀️ 2do Turno</option>
+                  <option value="3er Turno">🌙 3er Turno</option>
                 </select>
               </div>
               <div className="form-group">
                 <label className="form-label">Fiscalía</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={formData.fiscalia}
-                  onChange={(e) => setFormData({...formData, fiscalia: e.target.value})}
-                  required
-                />
+                <input type="text" className="form-control" value={formData.fiscalia} onChange={(e) => setFormData({...formData, fiscalia: e.target.value})} required />
               </div>
               <div className="form-group">
                 <label className="form-label">Plazo</label>
-                <input
-                  type="date"
-                  className="form-control"
-                  value={formData.plazo}
-                  onChange={(e) => setFormData({...formData, plazo: e.target.value})}
-                  required
-                />
+                <input type="date" className="form-control" value={formData.plazo} onChange={(e) => setFormData({...formData, plazo: e.target.value})} required />
               </div>
             </div>
 
             <div className="form-group">
               <label className="form-label">Pericia Solicitada</label>
-              <textarea
-                className="form-control"
-                rows="4"
-                value={formData.pericia_solicitada}
-                onChange={(e) => setFormData({...formData, pericia_solicitada: e.target.value})}
-                required
-              />
+              <textarea className="form-control" rows="4" value={formData.pericia_solicitada} onChange={(e) => setFormData({...formData, pericia_solicitada: e.target.value})} required />
             </div>
 
             <div className="form-group">
               <label className="form-label">Número de Novedad</label>
-              <input
-                type="text"
-                className="form-control"
-                value={formData.numero_novedad}
-                onChange={(e) => setFormData({...formData, numero_novedad: e.target.value})}
-              />
+              <input type="text" className="form-control" value={formData.numero_novedad} onChange={(e) => setFormData({...formData, numero_novedad: e.target.value})} />
             </div>
 
             <div className="form-group">
-              <label className="form-label">Asignar a Usuarios ({formData.usuarios_asignados.length} seleccionados)</label>
-              <div className="usuarios-list">
-                {usuarios.map(usuario => (
-                  <label key={usuario.id} className="usuario-checkbox">
-                    <input
-                      type="checkbox"
-                      checked={formData.usuarios_asignados.includes(usuario.id)}
-                      onChange={() => toggleUsuario(usuario.id)}
-                    />
-                    {usuario.nombre_completo}
-                    {usuario.turno && ` (${usuario.turno})`}
-                  </label>
-                ))}
-              </div>
+              <label className="form-label">Asignar Usuarios</label>
+              <SelectorUsuarios
+                usuarios={usuarios}
+                usuariosSeleccionados={formData.usuarios_asignados}
+                onChange={(seleccionados) => setFormData({...formData, usuarios_asignados: seleccionados})}
+              />
             </div>
 
             <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? 'Guardando...' : '✅ Crear Pericia'}
+              {loading ? '⏳ Guardando...' : '✅ Crear Pericia'}
             </button>
           </form>
         </div>
       );
     }
 
-    // Componente Detalle de Pericia (simplificado - no incluyo el código completo por espacio)
-    function DetallePericia({ pericia, usuarioActual, onClose }) {
-      return (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '20px',
-          zIndex: 1000
-        }}>
-          <div className="card" style={{maxWidth: '800px', maxHeight: '90vh', overflow: 'auto'}}>
-            <h2>📋 Detalle de Pericia #{pericia.numero_sgsp}</h2>
-            <p><strong>Turno:</strong> {pericia.turno}</p>
-            <p><strong>Fecha:</strong> {new Date(pericia.fecha).toLocaleDateString()}</p>
-            <p><strong>Plazo:</strong> {new Date(pericia.plazo).toLocaleDateString()}</p>
-            <p><strong>Descripción:</strong> {pericia.pericia_solicitada}</p>
-            <button className="btn btn-secondary" onClick={onClose}>Cerrar</button>
-          </div>
-        </div>
-      );
-    }
-
-    // Componente Gestión de Usuarios
+    // Gestión de Usuarios
     function GestionUsuarios({ usuarios, onRecargar }) {
+      const [usuarioEditar, setUsuarioEditar] = useState(null);
+
       return (
         <div className="card">
           <h2>👥 Gestión de Usuarios</h2>
@@ -1120,6 +1340,7 @@
                   <th>Rol</th>
                   <th>Turno</th>
                   <th>Estado</th>
+                  <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -1129,59 +1350,56 @@
                     <td>{usuario.nombre_completo}</td>
                     <td>
                       <span className={`user-badge ${usuario.rol}`}>
-                        {usuario.rol}
+                        {usuario.rol === 'administrador' && '👑'}
+                        {usuario.rol === 'supervisor' && '👁️'}
+                        {usuario.rol === 'encargado' && '🎖️'}
+                        {usuario.rol === 'usuario' && '👤'}
+                        {' '}{usuario.rol}
                       </span>
                     </td>
-                    <td>{usuario.turno || 'Todos'}</td>
+                    <td>
+                      {usuario.turno ? (
+                        <span className="badge">
+                          {usuario.turno === '1er Turno' && '🌅'} 
+                          {usuario.turno === '2do Turno' && '☀️'} 
+                          {usuario.turno === '3er Turno' && '🌙'}
+                          {' '}{usuario.turno}
+                        </span>
+                      ) : (
+                        <span style={{color: '#a0aec0'}}>Todos</span>
+                      )}
+                    </td>
                     <td>
                       <span className={`badge ${usuario.activo ? 'badge-contestada' : 'badge-pendiente'}`}>
                         {usuario.activo ? 'Activo' : 'Inactivo'}
                       </span>
                     </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      );
-    }
-
-    // Componente Auditoría
-    function Auditoria({ logs }) {
-      return (
-        <div className="card">
-          <h2>📋 Registro de Auditoría</h2>
-          <div className="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Fecha/Hora</th>
-                  <th>Usuario</th>
-                  <th>Operación</th>
-                  <th>Tabla</th>
-                  <th>Detalles</th>
-                </tr>
-              </thead>
-              <tbody>
-                {logs.map(log => (
-                  <tr key={log.id}>
-                    <td>{new Date(log.created_at).toLocaleString()}</td>
-                    <td>{log.usuarios?.nombre_completo || 'Sistema'}</td>
                     <td>
-                      <span className={`badge ${log.operacion === 'DELETE' ? 'badge-pendiente' : 'badge-contestada'}`}>
-                        {log.operacion}
-                      </span>
-                    </td>
-                    <td>{log.tabla}</td>
-                    <td style={{fontSize: '12px', maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis'}}>
-                      {JSON.stringify(log.datos_nuevos || log.datos_anteriores || {}).substring(0, 100)}...
+                      <button
+                        className="btn btn-primary"
+                        style={{fontSize: '12px', padding: '6px 12px'}}
+                        onClick={() => setUsuarioEditar(usuario)}
+                      >
+                        ✏️ Editar
+                      </button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+
+          {usuarioEditar && (
+            <ModalEditarUsuario
+              usuario={usuarioEditar}
+              onClose={() => setUsuarioEditar(null)}
+              onGuardar={() => {
+                setUsuarioEditar(null);
+                onRecargar();
+                alert('Usuario actualizado correctamente');
+              }}
+            />
+          )}
         </div>
       );
     }
