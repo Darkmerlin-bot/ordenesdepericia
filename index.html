@@ -1343,31 +1343,52 @@
       const [stats, setStats] = useState({ total: 0, pendientes: 0, enProceso: 0, contestadas: 0 });
 
       useEffect(() => {
-        // Verificar si hay sesión guardada
-        const checkSession = async () => {
+        // Inicializar y verificar sesión
+        const init = async () => {
           try {
             const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-              await checkUser();
-            } else {
-              setLoading(false);
+            
+            if (session?.user) {
+              setUser(session.user);
+              
+              // Cargar datos del usuario
+              const { data: userData } = await supabase
+                .from('usuarios')
+                .select('*')
+                .eq('id', session.user.id)
+                .maybeSingle();
+              
+              if (userData) {
+                setUsuarioActual(userData);
+              }
             }
           } catch (error) {
-            console.error('Error en checkSession:', error);
+            console.error('Error:', error);
+          } finally {
             setLoading(false);
           }
         };
         
-        checkSession();
+        init();
         
-        // Escuchar cambios en la autenticación
+        // Escuchar cambios de autenticación
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-          if (event === 'SIGNED_IN' && session) {
-            await checkUser();
+          if (event === 'SIGNED_IN' && session?.user) {
+            setUser(session.user);
             
-            // Solicitar permiso para notificaciones después del login
+            const { data: userData } = await supabase
+              .from('usuarios')
+              .select('*')
+              .eq('id', session.user.id)
+              .maybeSingle();
+            
+            if (userData) {
+              setUsuarioActual(userData);
+            }
+            
+            // Pedir permiso de notificaciones
             if ('Notification' in window && Notification.permission === 'default') {
-              Notification.requestPermission();
+              Notification.requestPermission().catch(() => {});
             }
           } else if (event === 'SIGNED_OUT') {
             setUser(null);
@@ -1375,9 +1396,7 @@
           }
         });
         
-        return () => {
-          subscription.unsubscribe();
-        };
+        return () => subscription?.unsubscribe();
       }, []);
 
       useEffect(() => {
@@ -1387,42 +1406,6 @@
           return () => clearInterval(interval);
         }
       }, [user, usuarioActual, vistaActual]);
-
-      const checkUser = async () => {
-        try {
-          const { data: { session } } = await supabase.auth.getSession();
-          
-          if (!session || !session.user) {
-            console.log('No hay sesión activa');
-            setLoading(false);
-            return;
-          }
-          
-          const user = session.user;
-          setUser(user);
-          
-          // Obtener información del usuario desde la tabla
-          const { data: usuarioData, error } = await supabase
-            .from('usuarios')
-            .select('*')
-            .eq('id', user.id)
-            .single();
-          
-          if (error) {
-            console.error('Error BD:', error.message);
-            // Aunque haya error, permitir continuar
-            setUsuarioActual(null);
-          } else {
-            console.log('Usuario cargado:', usuarioData?.username, 'Rol:', usuarioData?.rol);
-            setUsuarioActual(usuarioData);
-          }
-        } catch (err) {
-          console.error('Error general:', err.message);
-        } finally {
-          // SIEMPRE ejecutar esto, pase lo que pase
-          setLoading(false);
-        }
-      };
 
       const cargarDatos = async () => {
         await Promise.all([
