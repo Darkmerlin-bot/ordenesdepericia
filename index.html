@@ -1368,17 +1368,25 @@
       useEffect(() => {
         console.log('🔵 1. useEffect - INICIANDO');
         
-        // Timeout de seguridad: forzar loading=false después de 10 segundos
+        // Timeout de seguridad: forzar loading=false después de 5 segundos
         const timeoutSeguridad = setTimeout(() => {
-          console.log('⚠️ TIMEOUT DE SEGURIDAD - Forzando setLoading(false)');
+          console.log('⚠️ TIMEOUT DE SEGURIDAD (5s) - Forzando setLoading(false)');
           setLoading(false);
-        }, 10000);
+        }, 5000);
         
-        // Inicializar y verificar sesión
+        // Inicializar y verificar sesión con retry
         const init = async () => {
           console.log('🔵 2. init() - Llamando getSession...');
+          
           try {
-            const { data: { session } } = await supabase.auth.getSession();
+            // Intentar obtener sesión con timeout más corto
+            const sessionPromise = supabase.auth.getSession();
+            const timeoutPromise = new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('Timeout')), 3000)
+            );
+            
+            const { data: { session } } = await Promise.race([sessionPromise, timeoutPromise]);
+            
             console.log('🔵 3. getSession completado. Sesión:', session ? 'SÍ' : 'NO');
             
             if (session?.user) {
@@ -1401,7 +1409,9 @@
               console.log('🔵 4. No hay sesión activa');
             }
           } catch (error) {
-            console.error('🔴 ERROR en init():', error);
+            console.error('🔴 ERROR en init():', error.message);
+            // Incluso si falla, continuar y mostrar login
+            console.log('⚠️ Asumiendo no hay sesión y mostrando login');
           } finally {
             console.log('🟢 7. FINALLY - setLoading(false)');
             clearTimeout(timeoutSeguridad);
