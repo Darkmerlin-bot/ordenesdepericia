@@ -494,6 +494,27 @@
     ];
 
     // ============================================
+    // FUNCIÓN GLOBAL: Registrar Logs
+    // ============================================
+    const registrarLogGlobal = async (userId, userName, accion, entidad, entidad_id, descripcion, datos_extra = null) => {
+      try {
+        await supabase.from('logs_actividad').insert({
+          usuario_id: userId,
+          usuario_nombre: userName,
+          accion: accion,
+          entidad: entidad,
+          entidad_id: entidad_id,
+          descripcion: descripcion,
+          datos_extra: datos_extra,
+          ip_address: null,
+          user_agent: navigator.userAgent
+        });
+      } catch (error) {
+        console.error('Error al registrar log:', error);
+      }
+    };
+
+    // ============================================
     // COMPONENTE: Login
     // ============================================
     function Login() {
@@ -766,6 +787,17 @@
             .from('pericias')
             .update({ estado: 'contestada' })
             .eq('id', pericia.id);
+
+          // Registrar log de contestación
+          await registrarLogGlobal(
+            usuarioActual.id, 
+            usuarioActual.nombre_completo,
+            'CONTESTAR', 
+            'pericia', 
+            pericia.id, 
+            `Pericia #${pericia.numero_sgsp} contestada`,
+            { fecha_respuesta: fechaRespuesta, hora_respuesta: horaRespuesta }
+          );
 
           setMiContestacion('');
           setFechaRespuesta(new Date().toISOString().split('T')[0]);
@@ -1145,6 +1177,17 @@
 
           if (asignacionError) throw asignacionError;
 
+          // Registrar log de creación
+          await registrarLogGlobal(
+            user.id, 
+            usuarioActual.nombre_completo,
+            'CREAR', 
+            'pericia', 
+            pericia.id, 
+            `Pericia #${pericia.numero_sgsp} creada con ${formData.usuarios_asignados.length} asignados`,
+            { turno: formData.turno, fiscalia: formData.fiscalia }
+          );
+
           alert('✅ Pericia creada exitosamente');
           onSuccess();
         } catch (err) {
@@ -1493,6 +1536,8 @@
       const [usuarios, setUsuarios] = useState([]);
       const [filtroTurno, setFiltroTurno] = useState('todos');
       const [periciaDetalle, setPericiaDetalle] = useState(null);
+      const [logs, setLogs] = useState([]);
+      const [loadingLogs, setLoadingLogs] = useState(false);
 
       useEffect(() => {
         const cachedUser = localStorage.getItem('usuarioActual');
@@ -1562,6 +1607,17 @@
             if (userData) {
               setUsuarioActual(userData);
               localStorage.setItem('usuarioActual', JSON.stringify(userData));
+              
+              // Registrar log de inicio de sesión
+              await registrarLogGlobal(
+                userData.id,
+                userData.nombre_completo,
+                'LOGIN',
+                'sesion',
+                null,
+                `Inicio de sesión: ${userData.username}`,
+                { rol: userData.rol, turno: userData.turno }
+              );
             }
           } else if (event === 'SIGNED_OUT') {
             setUser(null);
@@ -1637,10 +1693,71 @@
       };
 
       const handleLogout = async () => {
-        await supabase.auth.signOut();
+        try {
+          // Registrar log de cierre de sesión
+          await registrarLog('LOGOUT', 'sesion', null, 'Cierre de sesión');
+        } catch (e) {
+          console.log('No se pudo registrar log de logout');
+        }
+        
+        // Limpiar todo primero
         localStorage.clear();
-        window.location.reload();
+        sessionStorage.clear();
+        
+        // Forzar cierre de sesión
+        try {
+          await supabase.auth.signOut({ scope: 'global' });
+        } catch (e) {
+          console.log('Error en signOut:', e);
+        }
+        
+        // Limpiar estados
+        setUser(null);
+        setUsuarioActual(null);
+        setPericias([]);
+        setUsuarios([]);
+        
+        // Forzar recarga después de un pequeño delay
+        setTimeout(() => {
+          window.location.href = window.location.pathname;
+        }, 100);
       };
+
+      // ============================================
+      // FUNCIÓN PARA REGISTRAR LOGS (wrapper)
+      // ============================================
+      const registrarLog = async (accion, entidad, entidad_id, descripcion, datos_extra = null) => {
+        await registrarLogGlobal(user?.id, usuarioActual?.nombre_completo, accion, entidad, entidad_id, descripcion, datos_extra);
+      };
+
+      // Cargar logs (solo para admin)
+      const cargarLogs = async () => {
+        if (usuarioActual?.rol !== 'administrador') return;
+        
+        setLoadingLogs(true);
+        try {
+          const { data, error } = await supabase
+            .from('logs_actividad')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(200);
+          
+          if (error) throw error;
+          setLogs(data || []);
+        } catch (error) {
+          console.error('Error al cargar logs:', error);
+          setLogs([]);
+        } finally {
+          setLoadingLogs(false);
+        }
+      };
+
+      // Cargar logs cuando se cambia a la vista de logs
+      useEffect(() => {
+        if (vistaActual === 'logs' && usuarioActual?.rol === 'administrador') {
+          cargarLogs();
+        }
+      }, [vistaActual]);
 
       const handleArchivarPericia = async (periciaId) => {
         const motivo = prompt('Motivo del archivo (será registrado en auditoría):');
@@ -1650,6 +1767,9 @@
         }
 
         try {
+          // Obtener número de pericia para el log
+          const pericia = pericias.find(p => p.id === periciaId);
+          
           // Intentar con RPC primero
           const { data, error } = await supabase.rpc('soft_delete_pericia', {
             p_pericia_id: periciaId,
@@ -1672,6 +1792,12 @@
             throw new Error(data.error);
           }
 
+          // Registrar log
+          await registrarLog('ARCHIVAR', 'pericia', periciaId, 
+            `Pericia #${pericia?.numero_sgsp || periciaId} archivada`, 
+            { motivo: motivo.trim() }
+          );
+
           alert('✅ Pericia archivada correctamente');
           cargarDatos();
         } catch (error) {
@@ -1691,6 +1817,12 @@
         }
 
         try {
+          // Registrar log ANTES de eliminar
+          await registrarLog('ELIMINAR', 'pericia', periciaId, 
+            `Pericia #${numeroSgsp} eliminada permanentemente`, 
+            null
+          );
+
           // Intentar con RPC para bypass de RLS
           const { data, error } = await supabase.rpc('hard_delete_pericia', {
             p_pericia_id: periciaId
@@ -1727,6 +1859,9 @@
         if (!confirm('¿Restaurar esta pericia?')) return;
 
         try {
+          // Obtener datos de la pericia para el log
+          const pericia = pericias.find(p => p.id === periciaId);
+          
           const { data, error } = await supabase.rpc('restore_pericia', {
             p_pericia_id: periciaId
           });
@@ -1746,6 +1881,12 @@
           } else if (data && !data.success) {
             throw new Error(data.error);
           }
+
+          // Registrar log
+          await registrarLog('RESTAURAR', 'pericia', periciaId, 
+            `Pericia #${pericia?.numero_sgsp || periciaId} restaurada`, 
+            null
+          );
 
           alert('✅ Pericia restaurada');
           cargarDatos();
@@ -1799,6 +1940,12 @@
           a.click();
           document.body.removeChild(a);
           URL.revokeObjectURL(url);
+
+          // Registrar log
+          await registrarLog('BACKUP', 'sistema', null, 
+            `Backup generado: ${periciasData?.length || 0} pericias, ${contestacionesData?.length || 0} contestaciones`, 
+            { archivo: a.download }
+          );
 
           alert(`✅ Backup generado exitosamente\n\nContenido:\n- ${periciasData?.length || 0} pericias\n- ${asignacionesData?.length || 0} asignaciones\n- ${contestacionesData?.length || 0} contestaciones\n- ${usuariosData?.length || 0} usuarios`);
         } catch (error) {
@@ -1867,6 +2014,12 @@
                 if (!error) restaurados.contestaciones++;
               }
             }
+
+            // Registrar log
+            await registrarLog('RESTORE_BACKUP', 'sistema', null, 
+              `Backup restaurado: ${restaurados.pericias} pericias, ${restaurados.contestaciones} contestaciones`, 
+              { fecha_backup: backup.fecha, generado_por: backup.generado_por }
+            );
 
             alert(
               `✅ Restauración completada\n\n` +
@@ -2167,6 +2320,11 @@
                 👥 Usuarios
               </div>
             )}
+            {esAdmin && (
+              <div className={`tab ${vistaActual === 'logs' ? 'active' : ''}`} onClick={() => setVistaActual('logs')}>
+                📋 Logs
+              </div>
+            )}
           </div>
 
           {(esAdmin || esSupervisor) && ['pendientes', 'contestadas', 'todas', 'archivadas'].includes(vistaActual) && (
@@ -2232,6 +2390,81 @@
 
           {vistaActual === 'usuarios' && esAdmin && (
             <GestionUsuarios usuarios={usuarios} onRecargar={cargarDatos} />
+          )}
+
+          {vistaActual === 'logs' && esAdmin && (
+            <div className="card">
+              <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
+                <h2>📋 Registro de Actividades</h2>
+                <button className="btn btn-secondary" onClick={cargarLogs}>
+                  🔄 Actualizar
+                </button>
+              </div>
+              
+              {loadingLogs ? (
+                <div style={{textAlign: 'center', padding: '40px'}}>
+                  <div className="spinner" style={{margin: '0 auto 10px', borderColor: '#1a1a2e', borderTopColor: 'transparent'}}></div>
+                  Cargando logs...
+                </div>
+              ) : logs.length === 0 ? (
+                <div className="empty-state">
+                  <div className="empty-state-icon">📋</div>
+                  <h3>No hay registros</h3>
+                  <p style={{marginTop: '10px', color: '#6b7280'}}>
+                    Los registros de actividad aparecerán aquí
+                  </p>
+                </div>
+              ) : (
+                <div className="table-container">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th style={{width: '150px'}}>Fecha/Hora</th>
+                        <th style={{width: '150px'}}>Usuario</th>
+                        <th style={{width: '120px'}}>Acción</th>
+                        <th style={{width: '100px'}}>Entidad</th>
+                        <th>Descripción</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {logs.map((log, idx) => (
+                        <tr key={log.id || idx} style={{cursor: 'default'}}>
+                          <td style={{fontSize: '12px', color: '#6b7280'}}>
+                            {new Date(log.created_at).toLocaleDateString('es-UY')}<br/>
+                            {new Date(log.created_at).toLocaleTimeString('es-UY')}
+                          </td>
+                          <td>
+                            <strong>{log.usuario_nombre || 'Sistema'}</strong>
+                          </td>
+                          <td>
+                            <span className={`badge ${
+                              log.accion === 'CREAR' ? 'badge-contestada' :
+                              log.accion === 'ELIMINAR' ? 'badge-pendiente' :
+                              log.accion === 'ARCHIVAR' ? 'badge-en_proceso' :
+                              log.accion === 'CONTESTAR' ? 'badge-contestada' :
+                              log.accion === 'LOGIN' ? 'badge-contestada' :
+                              log.accion === 'LOGOUT' ? 'badge-en_proceso' :
+                              log.accion === 'BACKUP' ? 'badge-contestada' :
+                              log.accion === 'RESTORE_BACKUP' ? 'badge-en_proceso' :
+                              log.accion === 'RESTAURAR' ? 'badge-contestada' :
+                              ''
+                            }`}>
+                              {log.accion}
+                            </span>
+                          </td>
+                          <td style={{fontSize: '12px'}}>{log.entidad}</td>
+                          <td style={{fontSize: '13px'}}>{log.descripcion}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+              
+              <div style={{marginTop: '15px', padding: '10px', background: '#f8fafc', borderRadius: '8px', fontSize: '12px', color: '#6b7280'}}>
+                Mostrando últimos {logs.length} registros
+              </div>
+            </div>
           )}
 
           {periciaDetalle && (
