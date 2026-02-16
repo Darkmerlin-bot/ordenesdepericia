@@ -573,6 +573,7 @@
       const [loading, setLoading] = useState(true);
       const [miContestacion, setMiContestacion] = useState('');
       const [fechaRespuesta, setFechaRespuesta] = useState(new Date().toISOString().split('T')[0]);
+      const [horaRespuesta, setHoraRespuesta] = useState(new Date().toTimeString().slice(0,5));
       const [enviando, setEnviando] = useState(false);
       const [error, setError] = useState('');
       const [yaContesto, setYaContesto] = useState(false);
@@ -629,6 +630,11 @@
           return;
         }
 
+        if (!horaRespuesta) {
+          setError('Debe seleccionar la hora de respuesta');
+          return;
+        }
+
         setEnviando(true);
         setError('');
 
@@ -640,6 +646,7 @@
               usuario_id: usuarioActual.id,
               contestacion: miContestacion.trim(),
               fecha_respuesta: fechaRespuesta,
+              hora_respuesta: horaRespuesta,
               nombre_usuario: usuarioActual.nombre_completo
             });
 
@@ -653,6 +660,7 @@
 
           setMiContestacion('');
           setFechaRespuesta(new Date().toISOString().split('T')[0]);
+          setHoraRespuesta(new Date().toTimeString().slice(0,5));
           cargarDetalle();
           if (onActualizar) onActualizar();
 
@@ -736,9 +744,8 @@
                         <div className="contestacion-header">
                           <span><strong>{cont.nombre_usuario || cont.usuarios?.nombre_completo}</strong></span>
                           <span>
-                            📅 Resp: {cont.fecha_respuesta ? new Date(cont.fecha_respuesta).toLocaleDateString('es-UY') : 'N/A'}
-                            {' | '}
-                            🕐 {new Date(cont.created_at).toLocaleString('es-UY')}
+                            📅 {cont.fecha_respuesta ? new Date(cont.fecha_respuesta).toLocaleDateString('es-UY') : 'N/A'}
+                            {cont.hora_respuesta && ` 🕐 ${cont.hora_respuesta}`}
                           </span>
                         </div>
                         <div style={{whiteSpace: 'pre-wrap'}}>{cont.contestacion}</div>
@@ -757,16 +764,29 @@
                     <div className="detalle-label">✍️ Tu Contestación</div>
                     {error && <div className="alert alert-error">{error}</div>}
                     
-                    <div className="form-group">
-                      <label className="form-label">Fecha de Respuesta *</label>
-                      <input
-                        type="date"
-                        className="form-control"
-                        value={fechaRespuesta}
-                        onChange={(e) => setFechaRespuesta(e.target.value)}
-                        disabled={enviando}
-                        required
-                      />
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label className="form-label">Fecha de Respuesta *</label>
+                        <input
+                          type="date"
+                          className="form-control"
+                          value={fechaRespuesta}
+                          onChange={(e) => setFechaRespuesta(e.target.value)}
+                          disabled={enviando}
+                          required
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Hora de Respuesta *</label>
+                        <input
+                          type="time"
+                          className="form-control"
+                          value={horaRespuesta}
+                          onChange={(e) => setHoraRespuesta(e.target.value)}
+                          disabled={enviando}
+                          required
+                        />
+                      </div>
                     </div>
                     
                     <div className="form-group">
@@ -787,7 +807,7 @@
                     <button 
                       className="btn btn-success" 
                       onClick={handleEnviarContestacion}
-                      disabled={enviando || miContestacion.trim().length < 10 || !fechaRespuesta}
+                      disabled={enviando || miContestacion.trim().length < 10 || !fechaRespuesta || !horaRespuesta}
                       style={{width: '100%'}}
                     >
                       {enviando ? '⏳ Enviando...' : '📤 Enviar Contestación'}
