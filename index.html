@@ -9,27 +9,16 @@
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-family: 'Inter', sans-serif;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
       padding: 20px;
     }
-
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-
+    .container { max-width: 1400px; margin: 0 auto; }
     .header {
       background: white;
       padding: 20px 30px;
@@ -40,19 +29,8 @@
       justify-content: space-between;
       align-items: center;
     }
-
-    .header h1 {
-      color: #2d3748;
-      font-size: 24px;
-      font-weight: 700;
-    }
-
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
-
+    .header h1 { color: #2d3748; font-size: 24px; font-weight: 700; }
+    .user-info { display: flex; align-items: center; gap: 20px; }
     .user-badge {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
@@ -61,19 +39,9 @@
       font-weight: 600;
       font-size: 14px;
     }
-
-    .user-badge.administrador {
-      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    }
-
-    .user-badge.supervisor {
-      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-    }
-
-    .user-badge.encargado {
-      background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-    }
-
+    .user-badge.administrador { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+    .user-badge.supervisor { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+    .user-badge.encargado { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
     .btn {
       padding: 10px 20px;
       border: none;
@@ -86,45 +54,13 @@
       align-items: center;
       gap: 8px;
     }
-
-    .btn-primary {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-    }
-
-    .btn-danger {
-      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-      color: white;
-    }
-
-    .btn-secondary {
-      background: #e2e8f0;
-      color: #4a5568;
-    }
-
-    .btn-success {
-      background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-      color: white;
-    }
-
-    .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-
-    .btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    .tabs {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-    }
-
+    .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+    .btn-danger { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
+    .btn-secondary { background: #e2e8f0; color: #4a5568; }
+    .btn-success { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
     .tab {
       background: white;
       padding: 12px 24px;
@@ -134,12 +70,7 @@
       transition: all 0.3s;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-
-    .tab.active {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-    }
-
+    .tab.active { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
     .card {
       background: white;
       border-radius: 15px;
@@ -147,7 +78,6 @@
       box-shadow: 0 4px 6px rgba(0,0,0,0.1);
       margin-bottom: 20px;
     }
-
     .loading {
       display: flex;
       flex-direction: column;
@@ -157,7 +87,6 @@
       color: white;
       font-size: 18px;
     }
-
     .spinner {
       border: 4px solid rgba(255,255,255,0.3);
       border-top: 4px solid white;
@@ -167,43 +96,17 @@
       animation: spin 1s linear infinite;
       margin-bottom: 20px;
     }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    .login-container {
-      max-width: 400px;
-      margin: 100px auto;
-    }
-
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .login-container { max-width: 400px; margin: 100px auto; }
     .login-card {
       background: white;
       padding: 40px;
       border-radius: 20px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.2);
     }
-
-    .login-title {
-      font-size: 28px;
-      font-weight: 700;
-      text-align: center;
-      color: #2d3748;
-      margin-bottom: 30px;
-    }
-
-    .form-group {
-      margin-bottom: 20px;
-    }
-
-    .form-label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 600;
-      color: #4a5568;
-    }
-
+    .login-title { font-size: 28px; font-weight: 700; text-align: center; color: #2d3748; margin-bottom: 30px; }
+    .form-group { margin-bottom: 20px; }
+    .form-label { display: block; margin-bottom: 8px; font-weight: 600; color: #4a5568; }
     .form-control {
       width: 100%;
       padding: 12px;
@@ -212,47 +115,31 @@
       font-size: 14px;
       transition: border-color 0.3s;
     }
-
-    .form-control:focus {
-      outline: none;
-      border-color: #667eea;
-    }
-
+    .form-control:focus { outline: none; border-color: #667eea; }
     .form-row {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 15px;
       margin-bottom: 20px;
     }
-
     .alert {
       padding: 12px 16px;
       border-radius: 8px;
       margin-bottom: 20px;
       font-weight: 500;
     }
-
     .alert-error {
       background: #fed7d7;
       color: #c53030;
       border-left: 4px solid #f56565;
     }
-
     .alert-success {
       background: #c6f6d5;
       color: #2f855a;
       border-left: 4px solid #48bb78;
     }
-
-    .table-container {
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
+    .table-container { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
     th {
       background: #f7fafc;
       padding: 12px;
@@ -261,16 +148,8 @@
       color: #4a5568;
       border-bottom: 2px solid #e2e8f0;
     }
-
-    td {
-      padding: 12px;
-      border-bottom: 1px solid #e2e8f0;
-    }
-
-    tr:hover {
-      background: #f7fafc;
-    }
-
+    td { padding: 12px; border-bottom: 1px solid #e2e8f0; }
+    tr:hover { background: #f7fafc; cursor: pointer; }
     .badge {
       display: inline-block;
       padding: 4px 12px;
@@ -278,45 +157,18 @@
       font-size: 12px;
       font-weight: 600;
     }
-
-    .badge-pendiente {
-      background: #fed7d7;
-      color: #c53030;
-    }
-
-    .badge-en-proceso {
-      background: #feebc8;
-      color: #c05621;
-    }
-
-    .badge-contestada {
-      background: #c6f6d5;
-      color: #2f855a;
-    }
-
-    .badge-urgente {
-      background: #f093fb;
-      color: white;
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.7; }
-    }
-
-    /* NUEVA UI DE SELECCIÓN DE USUARIOS */
+    .badge-pendiente { background: #fed7d7; color: #c53030; }
+    .badge-en-proceso { background: #feebc8; color: #c05621; }
+    .badge-contestada { background: #c6f6d5; color: #2f855a; }
+    .badge-urgente { background: #f093fb; color: white; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
     .usuarios-selector {
       border: 2px solid #e2e8f0;
       border-radius: 12px;
       padding: 20px;
       background: #f7fafc;
     }
-
-    .usuarios-search {
-      margin-bottom: 15px;
-    }
-
+    .usuarios-search { margin-bottom: 15px; }
     .usuarios-search input {
       width: 100%;
       padding: 10px 15px;
@@ -324,12 +176,6 @@
       border-radius: 8px;
       font-size: 14px;
     }
-
-    .usuarios-search input:focus {
-      outline: none;
-      border-color: #667eea;
-    }
-
     .usuarios-stats {
       display: flex;
       justify-content: space-between;
@@ -341,19 +187,13 @@
       font-weight: 600;
       color: #4a5568;
     }
-
-    .usuarios-por-turno {
-      display: grid;
-      gap: 15px;
-    }
-
+    .usuarios-por-turno { display: grid; gap: 15px; }
     .turno-group {
       background: white;
       border-radius: 10px;
       padding: 15px;
       border: 2px solid #e2e8f0;
     }
-
     .turno-header {
       font-weight: 700;
       color: #2d3748;
@@ -364,18 +204,12 @@
       justify-content: space-between;
       align-items: center;
     }
-
-    .turno-header .badge {
-      font-size: 11px;
-    }
-
     .usuarios-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
       gap: 8px;
       margin-top: 10px;
     }
-
     .usuario-checkbox {
       display: flex;
       align-items: center;
@@ -387,22 +221,12 @@
       background: #f7fafc;
       border: 1px solid #e2e8f0;
     }
-
-    .usuario-checkbox:hover {
-      background: #edf2f7;
-      border-color: #cbd5e0;
-    }
-
+    .usuario-checkbox:hover { background: #edf2f7; border-color: #cbd5e0; }
     .usuario-checkbox.selected {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
       border-color: #667eea;
     }
-
-    .usuario-checkbox input {
-      cursor: pointer;
-    }
-
     .select-all-turno {
       font-size: 12px;
       padding: 4px 8px;
@@ -412,35 +236,11 @@
       cursor: pointer;
       transition: all 0.2s;
     }
-
-    .select-all-turno:hover {
-      background: #edf2f7;
-    }
-
-    .filters {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-    }
-
-    select.form-control {
-      width: auto;
-      min-width: 150px;
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 60px 20px;
-      color: #718096;
-    }
-
-    .empty-state-icon {
-      font-size: 64px;
-      margin-bottom: 20px;
-      opacity: 0.5;
-    }
-
+    .select-all-turno:hover { background: #edf2f7; }
+    .filters { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+    select.form-control { width: auto; min-width: 150px; }
+    .empty-state { text-align: center; padding: 60px 20px; color: #718096; }
+    .empty-state-icon { font-size: 64px; margin-bottom: 20px; opacity: 0.5; }
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -454,17 +254,15 @@
       padding: 20px;
       z-index: 1000;
     }
-
     .modal-content {
       background: white;
       border-radius: 15px;
-      max-width: 600px;
+      max-width: 800px;
       width: 100%;
       max-height: 90vh;
       overflow-y: auto;
       padding: 30px;
     }
-
     .modal-header {
       display: flex;
       justify-content: space-between;
@@ -473,12 +271,7 @@
       padding-bottom: 15px;
       border-bottom: 2px solid #e2e8f0;
     }
-
-    .modal-header h3 {
-      font-size: 20px;
-      color: #2d3748;
-    }
-
+    .modal-header h3 { font-size: 20px; color: #2d3748; }
     .close-btn {
       background: none;
       border: none;
@@ -494,10 +287,37 @@
       border-radius: 50%;
       transition: all 0.2s;
     }
-
-    .close-btn:hover {
-      background: #edf2f7;
-      color: #2d3748;
+    .close-btn:hover { background: #edf2f7; color: #2d3748; }
+    .char-counter {
+      text-align: right;
+      font-size: 12px;
+      color: #718096;
+      margin-top: 5px;
+    }
+    .char-counter.error { color: #c53030; font-weight: 600; }
+    .detalle-section {
+      margin-bottom: 20px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .detalle-section:last-child { border-bottom: none; }
+    .detalle-label {
+      font-weight: 600;
+      color: #4a5568;
+      margin-bottom: 5px;
+    }
+    .detalle-value { color: #2d3748; }
+    .usuarios-asignados-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .usuario-asignado-item {
+      padding: 8px 12px;
+      background: #f7fafc;
+      border-radius: 6px;
+      font-size: 14px;
     }
   </style>
 </head>
@@ -511,8 +331,21 @@
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRocHdka3lzcmpqc2FndGlxd216Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5MDcwMTMsImV4cCI6MjA4NjQ4MzAxM30.L4j6986BRq7ghpleZFh3GJqt5MfaMsRBwTDP3Ubhm90';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // Componente de Login
-    function Login({ onLogin }) {
+    const FISCALIAS = [
+      '1° Turno',
+      '2° Turno',
+      '3° Turno',
+      '4° Turno',
+      '5° Turno',
+      '6° Turno',
+      'Flagrancia',
+      'Crimen Organizado',
+      'Género',
+      'Otro'
+    ];
+
+    // Login Component
+    function Login() {
       const [username, setUsername] = useState('');
       const [password, setPassword] = useState('');
       const [loading, setLoading] = useState(false);
@@ -530,21 +363,15 @@
             .eq('username', username)
             .single();
 
-          if (userError || !usuarioData) {
-            throw new Error('Usuario no encontrado');
-          }
+          if (userError || !usuarioData) throw new Error('Usuario no encontrado');
+          if (!usuarioData.activo) throw new Error('Usuario inactivo');
 
-          if (!usuarioData.activo) {
-            throw new Error('Usuario inactivo');
-          }
-
-          const { data, error } = await supabase.auth.signInWithPassword({
+          const { error } = await supabase.auth.signInWithPassword({
             email: usuarioData.email,
             password: password
           });
 
           if (error) throw error;
-
         } catch (err) {
           setError(err.message);
           setLoading(false);
@@ -588,7 +415,7 @@
       );
     }
 
-    // NUEVO: Componente Selector de Usuarios Mejorado
+    // Selector Usuarios Component
     function SelectorUsuarios({ usuarios, usuariosSeleccionados, onChange }) {
       const [busqueda, setBusqueda] = useState('');
 
@@ -642,69 +469,42 @@
           <div className="usuarios-search">
             <input
               type="text"
-              placeholder="🔍 Buscar usuario por nombre..."
+              placeholder="🔍 Buscar usuario..."
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
             />
           </div>
-
           <div className="usuarios-stats">
-            <span>👥 {usuariosSeleccionados.length} usuario(s) seleccionado(s)</span>
-            <button 
-              type="button"
-              className="btn btn-secondary"
-              style={{fontSize: '12px', padding: '6px 12px'}}
-              onClick={() => onChange([])}
-            >
-              Limpiar selección
+            <span>👥 {usuariosSeleccionados.length} seleccionado(s)</span>
+            <button type="button" className="btn btn-secondary" style={{fontSize: '12px', padding: '6px 12px'}} onClick={() => onChange([])}>
+              Limpiar
             </button>
           </div>
-
           <div className="usuarios-por-turno">
             {Object.entries(usuariosPorTurno).map(([turno, usuariosTurno]) => {
               if (usuariosTurno.length === 0) return null;
-
               const todosSeleccionados = usuariosTurno.every(u => usuariosSeleccionados.includes(u.id));
-              const algunosSeleccionados = usuariosTurno.some(u => usuariosSeleccionados.includes(u.id));
-
               return (
                 <div key={turno} className="turno-group">
                   <div className="turno-header">
-                    <span>
-                      {turno === '1er Turno' && '🌅'} 
-                      {turno === '2do Turno' && '☀️'} 
-                      {turno === '3er Turno' && '🌙'}
-                      {turno === 'Sin Turno' && '👥'}
-                      {' '}{turno}
-                    </span>
+                    <span>{turno}</span>
                     <div style={{display: 'flex', gap: '8px', alignItems: 'center'}}>
-                      <span className="badge">
-                        {usuariosTurno.filter(u => usuariosSeleccionados.includes(u.id)).length} / {usuariosTurno.length}
-                      </span>
-                      <button
-                        type="button"
-                        className="select-all-turno"
-                        onClick={() => seleccionarTodosTurno(turno)}
-                      >
-                        {todosSeleccionados ? '✓ Todos' : algunosSeleccionados ? '◐ Algunos' : 'Seleccionar todos'}
+                      <span className="badge">{usuariosTurno.filter(u => usuariosSeleccionados.includes(u.id)).length}/{usuariosTurno.length}</span>
+                      <button type="button" className="select-all-turno" onClick={() => seleccionarTodosTurno(turno)}>
+                        {todosSeleccionados ? '✓ Todos' : 'Seleccionar'}
                       </button>
                     </div>
                   </div>
                   <div className="usuarios-grid">
                     {usuariosTurno.map(usuario => (
-                      <label 
-                        key={usuario.id} 
-                        className={`usuario-checkbox ${usuariosSeleccionados.includes(usuario.id) ? 'selected' : ''}`}
-                      >
+                      <label key={usuario.id} className={`usuario-checkbox ${usuariosSeleccionados.includes(usuario.id) ? 'selected' : ''}`}>
                         <input
                           type="checkbox"
                           checked={usuariosSeleccionados.includes(usuario.id)}
                           onChange={() => toggleUsuario(usuario.id)}
                           style={{display: 'none'}}
                         />
-                        <span style={{fontSize: '12px', fontWeight: '500'}}>
-                          {usuario.nombre_completo}
-                        </span>
+                        <span style={{fontSize: '12px'}}>{usuario.nombre_completo}</span>
                       </label>
                     ))}
                   </div>
@@ -716,144 +516,108 @@
       );
     }
 
-    // NUEVO: Modal para Editar Usuario
-    function ModalEditarUsuario({ usuario, onClose, onGuardar }) {
-      const [rol, setRol] = useState(usuario.rol);
-      const [turno, setTurno] = useState(usuario.turno || '');
-      const [activo, setActivo] = useState(usuario.activo);
-      const [loading, setLoading] = useState(false);
-      const [error, setError] = useState('');
+    // Modal Detalle Pericia
+    function ModalDetallePericia({ pericia, onClose }) {
+      const [usuariosAsignados, setUsuariosAsignados] = useState([]);
+      const [contestaciones, setContestaciones] = useState([]);
+      const [loading, setLoading] = useState(true);
 
-      const handleGuardar = async () => {
-        setLoading(true);
-        setError('');
+      useEffect(() => {
+        const cargarDetalle = async () => {
+          try {
+            const { data: asignacionesData } = await supabase
+              .from('asignaciones')
+              .select('usuario_id, usuarios(nombre_completo, turno)')
+              .eq('pericia_id', pericia.id);
 
-        try {
-          // Validación: admin y supervisor no deben tener turno
-          const turnoFinal = ['administrador', 'supervisor'].includes(rol) ? null : turno || null;
+            const { data: contestacionesData } = await supabase
+              .from('contestaciones')
+              .select('*, usuarios(nombre_completo)')
+              .eq('pericia_id', pericia.id)
+              .order('created_at', { ascending: false });
 
-          const { error: updateError } = await supabase
-            .from('usuarios')
-            .update({
-              rol: rol,
-              turno: turnoFinal,
-              activo: activo
-            })
-            .eq('id', usuario.id);
+            setUsuariosAsignados(asignacionesData || []);
+            setContestaciones(contestacionesData || []);
+          } catch (error) {
+            console.error('Error:', error);
+          } finally {
+            setLoading(false);
+          }
+        };
 
-          if (updateError) throw updateError;
+        cargarDetalle();
+      }, [pericia.id]);
 
-          onGuardar();
-        } catch (err) {
-          setError(err.message);
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      const esAdminOSupervisor = ['administrador', 'supervisor'].includes(rol);
+      const diasRestantes = Math.ceil((new Date(pericia.plazo) - new Date()) / (1000 * 60 * 60 * 24));
 
       return (
         <div className="modal-overlay" onClick={onClose}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>✏️ Editar Usuario</h3>
+              <h3>📋 Pericia #{pericia.numero_sgsp}</h3>
               <button className="close-btn" onClick={onClose}>×</button>
             </div>
 
-            {error && <div className="alert alert-error">{error}</div>}
+            {loading ? (
+              <div style={{textAlign: 'center', padding: '20px'}}>Cargando...</div>
+            ) : (
+              <>
+                <div className="detalle-section">
+                  <div className="detalle-label">Información General</div>
+                  <p><strong>Turno:</strong> {pericia.turno}</p>
+                  <p><strong>Fiscalía:</strong> {pericia.fiscalia}</p>
+                  <p><strong>Fecha:</strong> {new Date(pericia.fecha).toLocaleDateString()} {pericia.hora}</p>
+                  <p><strong>Plazo:</strong> {new Date(pericia.plazo).toLocaleDateString()} <span style={{color: diasRestantes <= 2 ? '#c53030' : '#2d3748'}}>({diasRestantes} días {diasRestantes <= 2 ? '🔥' : ''})</span></p>
+                  <p><strong>Estado:</strong> <span className={`badge badge-${pericia.estado}`}>{pericia.estado}</span></p>
+                </div>
 
-            <div className="form-group">
-              <label className="form-label">Usuario</label>
-              <input
-                type="text"
-                className="form-control"
-                value={usuario.username}
-                disabled
-              />
-            </div>
+                <div className="detalle-section">
+                  <div className="detalle-label">Pericia Solicitada</div>
+                  <div className="detalle-value" style={{whiteSpace: 'pre-wrap'}}>{pericia.pericia_solicitada}</div>
+                </div>
 
-            <div className="form-group">
-              <label className="form-label">Nombre Completo</label>
-              <input
-                type="text"
-                className="form-control"
-                value={usuario.nombre_completo}
-                disabled
-              />
-            </div>
+                {pericia.numero_novedad && (
+                  <div className="detalle-section">
+                    <div className="detalle-label">Número de Novedad</div>
+                    <div className="detalle-value">{pericia.numero_novedad}</div>
+                  </div>
+                )}
 
-            <div className="form-group">
-              <label className="form-label">Rol</label>
-              <select
-                className="form-control"
-                value={rol}
-                onChange={(e) => setRol(e.target.value)}
-              >
-                <option value="administrador">👑 Administrador</option>
-                <option value="supervisor">👁️ Supervisor</option>
-                <option value="encargado">🎖️ Encargado</option>
-                <option value="usuario">👤 Usuario</option>
-              </select>
-            </div>
+                <div className="detalle-section">
+                  <div className="detalle-label">Usuarios Asignados ({usuariosAsignados.length})</div>
+                  <div className="usuarios-asignados-list">
+                    {usuariosAsignados.map((asig, idx) => (
+                      <div key={idx} className="usuario-asignado-item">
+                        👤 {asig.usuarios?.nombre_completo}
+                        {asig.usuarios?.turno && <div style={{fontSize: '11px', color: '#718096'}}>{asig.usuarios.turno}</div>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
 
-            {!esAdminOSupervisor && (
-              <div className="form-group">
-                <label className="form-label">Turno</label>
-                <select
-                  className="form-control"
-                  value={turno}
-                  onChange={(e) => setTurno(e.target.value)}
-                >
-                  <option value="">Seleccionar turno...</option>
-                  <option value="1er Turno">🌅 1er Turno</option>
-                  <option value="2do Turno">☀️ 2do Turno</option>
-                  <option value="3er Turno">🌙 3er Turno</option>
-                </select>
-              </div>
+                <div className="detalle-section">
+                  <div className="detalle-label">Contestaciones ({contestaciones.length}/{usuariosAsignados.length})</div>
+                  {contestaciones.length > 0 ? (
+                    contestaciones.map((cont, idx) => (
+                      <div key={idx} style={{marginBottom: '10px', padding: '10px', background: '#f7fafc', borderRadius: '6px'}}>
+                        <div style={{fontSize: '12px', color: '#718096', marginBottom: '5px'}}>
+                          {cont.usuarios?.nombre_completo} - {new Date(cont.created_at).toLocaleString()}
+                        </div>
+                        <div style={{fontSize: '14px'}}>{cont.contestacion.substring(0, 150)}...</div>
+                      </div>
+                    ))
+                  ) : (
+                    <div style={{color: '#718096', fontStyle: 'italic'}}>Sin contestaciones aún</div>
+                  )}
+                </div>
+              </>
             )}
-
-            {esAdminOSupervisor && (
-              <div className="alert" style={{background: '#bee3f8', color: '#2c5282', border: 'none'}}>
-                ℹ️ Administradores y Supervisores no tienen turno asignado (ven todos los turnos)
-              </div>
-            )}
-
-            <div className="form-group">
-              <label style={{display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer'}}>
-                <input
-                  type="checkbox"
-                  checked={activo}
-                  onChange={(e) => setActivo(e.target.checked)}
-                  style={{width: 'auto', cursor: 'pointer'}}
-                />
-                <span className="form-label" style={{marginBottom: 0}}>Usuario Activo</span>
-              </label>
-            </div>
-
-            <div style={{display: 'flex', gap: '10px', marginTop: '20px'}}>
-              <button 
-                className="btn btn-success" 
-                onClick={handleGuardar}
-                disabled={loading}
-                style={{flex: 1}}
-              >
-                {loading ? 'Guardando...' : '💾 Guardar Cambios'}
-              </button>
-              <button 
-                className="btn btn-secondary" 
-                onClick={onClose}
-                disabled={loading}
-              >
-                Cancelar
-              </button>
-            </div>
           </div>
         </div>
       );
     }
 
-    // Componente Principal
+    // Main App Component
     function App() {
       const [user, setUser] = useState(null);
       const [usuarioActual, setUsuarioActual] = useState(null);
@@ -862,16 +626,13 @@
       const [pericias, setPericias] = useState([]);
       const [usuarios, setUsuarios] = useState([]);
       const [filtroTurno, setFiltroTurno] = useState('todos');
+      const [periciaDetalle, setPericiaDetalle] = useState(null);
 
       useEffect(() => {
-        console.log('🔵 Inicializando...');
-        
         const cachedUser = localStorage.getItem('usuarioActual');
         if (cachedUser) {
           try {
-            const parsed = JSON.parse(cachedUser);
-            console.log('📦 Usuario desde caché:', parsed.username);
-            setUsuarioActual(parsed);
+            setUsuarioActual(JSON.parse(cachedUser));
           } catch (e) {
             localStorage.removeItem('usuarioActual');
           }
@@ -891,13 +652,12 @@
                 .maybeSingle();
               
               if (userData) {
-                console.log('✅ Usuario:', userData.username, userData.rol);
                 setUsuarioActual(userData);
                 localStorage.setItem('usuarioActual', JSON.stringify(userData));
               }
             }
           } catch (error) {
-            console.error('❌ Error:', error);
+            console.error('Error:', error);
           } finally {
             setLoading(false);
           }
@@ -908,13 +668,7 @@
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
           if (event === 'SIGNED_IN' && session?.user) {
             setUser(session.user);
-            
-            const { data: userData } = await supabase
-              .from('usuarios')
-              .select('*')
-              .eq('id', session.user.id)
-              .maybeSingle();
-            
+            const { data: userData } = await supabase.from('usuarios').select('*').eq('id', session.user.id).maybeSingle();
             if (userData) {
               setUsuarioActual(userData);
               localStorage.setItem('usuarioActual', JSON.stringify(userData));
@@ -937,19 +691,23 @@
 
       const cargarDatos = async () => {
         try {
-          let query = supabase.from('pericias').select(`
-            *,
-            creador:usuarios!pericias_creado_por_fkey(nombre_completo),
-            asignaciones(usuario_id),
-            contestaciones(id, usuario_id)
-          `);
+          let query = supabase.from('pericias').select('*');
 
+          // Filtrar borradas excepto en vista archivadas
+          if (vistaActual !== 'archivadas') {
+            query = query.is('deleted_at', null);
+          } else {
+            query = query.not('deleted_at', 'is', null);
+          }
+
+          // Filtrar por estado
           if (vistaActual === 'pendientes') {
             query = query.in('estado', ['pendiente', 'en_proceso']);
           } else if (vistaActual === 'contestadas') {
             query = query.eq('estado', 'contestada');
           }
 
+          // Filtrar por rol
           if (usuarioActual.rol === 'encargado' && usuarioActual.turno) {
             query = query.eq('turno', usuarioActual.turno);
           } else if (usuarioActual.rol === 'usuario') {
@@ -962,6 +720,7 @@
             query = query.in('id', periciaIds.length > 0 ? periciaIds : ['00000000-0000-0000-0000-000000000000']);
           }
 
+          // Filtro turno
           if (filtroTurno !== 'todos' && ['administrador', 'supervisor'].includes(usuarioActual.rol)) {
             query = query.eq('turno', filtroTurno);
           }
@@ -969,6 +728,7 @@
           const { data: periciasData } = await query.order('created_at', { ascending: false });
           setPericias(periciasData || []);
 
+          // Cargar usuarios
           if (['administrador', 'supervisor', 'encargado'].includes(usuarioActual.rol)) {
             const { data: usuariosData } = await supabase
               .from('usuarios')
@@ -977,9 +737,8 @@
               .order('nombre_completo');
             setUsuarios(usuariosData || []);
           }
-
         } catch (error) {
-          console.error('Error al cargar:', error);
+          console.error('Error:', error);
         }
       };
 
@@ -989,20 +748,38 @@
         window.location.reload();
       };
 
-      const handleBorrarPericia = async (periciaId) => {
-        if (!confirm('¿Seguro de borrar esta pericia? Quedará en auditoría.')) {
-          return;
-        }
+      const handleArchivarPericia = async (periciaId) => {
+        const motivo = prompt('Motivo del archivo (será registrado en auditoría):');
+        if (!motivo) return;
 
         try {
-          const { error } = await supabase
-            .from('pericias')
-            .delete()
-            .eq('id', periciaId);
+          const { data, error } = await supabase.rpc('soft_delete_pericia', {
+            p_pericia_id: periciaId,
+            p_motivo: motivo
+          });
 
           if (error) throw error;
+          if (data && !data.success) throw new Error(data.error);
 
-          alert('Pericia borrada');
+          alert('Pericia archivada correctamente');
+          cargarDatos();
+        } catch (error) {
+          alert('Error: ' + error.message);
+        }
+      };
+
+      const handleRestaurarPericia = async (periciaId) => {
+        if (!confirm('¿Restaurar esta pericia?')) return;
+
+        try {
+          const { data, error } = await supabase.rpc('restore_pericia', {
+            p_pericia_id: periciaId
+          });
+
+          if (error) throw error;
+          if (data && !data.success) throw new Error(data.error);
+
+          alert('Pericia restaurada');
           cargarDatos();
         } catch (error) {
           alert('Error: ' + error.message);
@@ -1018,9 +795,7 @@
         );
       }
 
-      if (!user || !usuarioActual) {
-        return <Login />;
-      }
+      if (!user || !usuarioActual) return <Login />;
 
       const esAdmin = usuarioActual.rol === 'administrador';
       const esSupervisor = usuarioActual.rol === 'supervisor';
@@ -1035,62 +810,46 @@
                 {usuarioActual.rol === 'supervisor' && '👁️'}
                 {usuarioActual.rol === 'encargado' && '🎖️'}
                 {usuarioActual.rol === 'usuario' && '👤'}
-                {' '}
-                {usuarioActual.nombre_completo} - {usuarioActual.rol.charAt(0).toUpperCase() + usuarioActual.rol.slice(1)}
+                {' '}{usuarioActual.nombre_completo} - {usuarioActual.rol.charAt(0).toUpperCase() + usuarioActual.rol.slice(1)}
                 {usuarioActual.turno && ` (${usuarioActual.turno})`}
               </div>
-              <button className="btn btn-secondary" onClick={handleLogout}>
-                🚪 Salir
-              </button>
+              <button className="btn btn-secondary" onClick={handleLogout}>🚪 Salir</button>
             </div>
           </div>
 
           <div className="tabs">
-            <div className={`tab ${vistaActual === 'pendientes' ? 'active' : ''}`} onClick={() => setVistaActual('pendientes')}>
-              📥 Pendientes
-            </div>
-            <div className={`tab ${vistaActual === 'contestadas' ? 'active' : ''}`} onClick={() => setVistaActual('contestadas')}>
-              ✅ Contestadas
-            </div>
-            <div className={`tab ${vistaActual === 'nueva' ? 'active' : ''}`} onClick={() => setVistaActual('nueva')}>
-              ➕ Nueva Pericia
-            </div>
-            {(esAdmin || esSupervisor) && (
-              <div className={`tab ${vistaActual === 'todas' ? 'active' : ''}`} onClick={() => setVistaActual('todas')}>
-                📊 Todas
-              </div>
-            )}
-            {esAdmin && (
-              <div className={`tab ${vistaActual === 'usuarios' ? 'active' : ''}`} onClick={() => setVistaActual('usuarios')}>
-                👥 Usuarios
-              </div>
-            )}
+            <div className={`tab ${vistaActual === 'pendientes' ? 'active' : ''}`} onClick={() => setVistaActual('pendientes')}>📥 Pendientes</div>
+            <div className={`tab ${vistaActual === 'contestadas' ? 'active' : ''}`} onClick={() => setVistaActual('contestadas')}>✅ Contestadas</div>
+            <div className={`tab ${vistaActual === 'nueva' ? 'active' : ''}`} onClick={() => setVistaActual('nueva')}>➕ Nueva</div>
+            {(esAdmin || esSupervisor) && <div className={`tab ${vistaActual === 'todas' ? 'active' : ''}`} onClick={() => setVistaActual('todas')}>📊 Todas</div>}
+            {esAdmin && <div className={`tab ${vistaActual === 'archivadas' ? 'active' : ''}`} onClick={() => setVistaActual('archivadas')}>🗑️ Archivadas</div>}
+            {esAdmin && <div className={`tab ${vistaActual === 'usuarios' ? 'active' : ''}`} onClick={() => setVistaActual('usuarios')}>👥 Usuarios</div>}
           </div>
 
-          {(esAdmin || esSupervisor) && ['pendientes', 'contestadas', 'todas'].includes(vistaActual) && (
+          {(esAdmin || esSupervisor) && ['pendientes', 'contestadas', 'todas', 'archivadas'].includes(vistaActual) && (
             <div className="filters">
               <select className="form-control" value={filtroTurno} onChange={(e) => setFiltroTurno(e.target.value)}>
                 <option value="todos">Todos los turnos</option>
-                <option value="1er Turno">🌅 1er Turno</option>
-                <option value="2do Turno">☀️ 2do Turno</option>
-                <option value="3er Turno">🌙 3er Turno</option>
+                <option value="1er Turno">1er Turno</option>
+                <option value="2do Turno">2do Turno</option>
+                <option value="3er Turno">3er Turno</option>
               </select>
             </div>
           )}
 
-          {['pendientes', 'contestadas', 'todas'].includes(vistaActual) && (
+          {['pendientes', 'contestadas', 'todas', 'archivadas'].includes(vistaActual) && (
             <ListaPericias
               pericias={pericias}
-              usuarioActual={usuarioActual}
-              onRecargar={cargarDatos}
-              onBorrar={esAdmin ? handleBorrarPericia : null}
+              esArchivadas={vistaActual === 'archivadas'}
+              onVerDetalle={(p) => setPericiaDetalle(p)}
+              onArchivar={esAdmin && vistaActual !== 'archivadas' ? handleArchivarPericia : null}
+              onRestaurar={esAdmin && vistaActual === 'archivadas' ? handleRestaurarPericia : null}
             />
           )}
 
           {vistaActual === 'nueva' && (
             <FormularioPericia
               usuarios={usuarios}
-              usuarioActual={usuarioActual}
               onSuccess={() => {
                 cargarDatos();
                 setVistaActual('pendientes');
@@ -1101,12 +860,19 @@
           {vistaActual === 'usuarios' && esAdmin && (
             <GestionUsuarios usuarios={usuarios} onRecargar={cargarDatos} />
           )}
+
+          {periciaDetalle && (
+            <ModalDetallePericia
+              pericia={periciaDetalle}
+              onClose={() => setPericiaDetalle(null)}
+            />
+          )}
         </div>
       );
     }
 
-    // Lista de Pericias
-    function ListaPericias({ pericias, usuarioActual, onRecargar, onBorrar }) {
+    // Lista Pericias Component
+    function ListaPericias({ pericias, esArchivadas, onVerDetalle, onArchivar, onRestaurar }) {
       if (pericias.length === 0) {
         return (
           <div className="card">
@@ -1139,31 +905,29 @@
                   const esUrgente = diasRestantes <= 2 && pericia.estado !== 'contestada';
 
                   return (
-                    <tr key={pericia.id}>
+                    <tr key={pericia.id} onClick={() => onVerDetalle(pericia)}>
                       <td><strong>{pericia.numero_sgsp}</strong></td>
-                      <td>
-                        <span className="badge">
-                          {pericia.turno === '1er Turno' && '🌅'} 
-                          {pericia.turno === '2do Turno' && '☀️'} 
-                          {pericia.turno === '3er Turno' && '🌙'}
-                          {' '}{pericia.turno}
-                        </span>
-                      </td>
+                      <td><span className="badge">{pericia.turno}</span></td>
                       <td>{new Date(pericia.fecha).toLocaleDateString()}</td>
                       <td>{pericia.pericia_solicitada.substring(0, 50)}...</td>
                       <td>
                         {new Date(pericia.plazo).toLocaleDateString()}
-                        {esUrgente && <span className="badge badge-urgente" style={{marginLeft: '8px'}}>🔥 URGENTE</span>}
+                        {esUrgente && <span className="badge badge-urgente" style={{marginLeft: '8px'}}>🔥</span>}
                       </td>
                       <td>
                         <span className={`badge badge-${pericia.estado}`}>
                           {pericia.estado.charAt(0).toUpperCase() + pericia.estado.slice(1).replace('_', ' ')}
                         </span>
                       </td>
-                      <td>
-                        {onBorrar && (
-                          <button className="btn btn-danger" style={{fontSize: '12px', padding: '6px 12px'}} onClick={() => onBorrar(pericia.id)}>
-                            🗑️
+                      <td onClick={(e) => e.stopPropagation()}>
+                        {onArchivar && (
+                          <button className="btn btn-danger" style={{fontSize: '12px', padding: '6px 12px'}} onClick={() => onArchivar(pericia.id)}>
+                            🗑️ Archivar
+                          </button>
+                        )}
+                        {onRestaurar && (
+                          <button className="btn btn-success" style={{fontSize: '12px', padding: '6px 12px'}} onClick={() => onRestaurar(pericia.id)}>
+                            ↩️ Restaurar
                           </button>
                         )}
                       </td>
@@ -1177,8 +941,8 @@
       );
     }
 
-    // Formulario de Pericia
-    function FormularioPericia({ usuarios, usuarioActual, onSuccess }) {
+    // Formulario Pericia Component  
+    function FormularioPericia({ usuarios, onSuccess }) {
       const [loading, setLoading] = useState(false);
       const [error, setError] = useState('');
       const [formData, setFormData] = useState({
@@ -1186,18 +950,35 @@
         hora: new Date().toTimeString().slice(0,5),
         numero_sgsp: '',
         pericia_solicitada: '',
-        fiscalia: '1er Turno',
+        fiscalia: '',
+        fiscalia_otra: '',
         plazo: '',
         numero_novedad: '',
         turno: '1er Turno',
         usuarios_asignados: []
       });
 
+      const contadorChars = formData.pericia_solicitada.length;
+      const esValido = contadorChars >= 20 && contadorChars <= 5000;
+
       const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log('📝 Iniciando creación...');
         setLoading(true);
         setError('');
+
+        const descripcion = formData.pericia_solicitada.trim();
+        
+        if (descripcion.length < 20) {
+          setError('La descripción debe tener al menos 20 caracteres');
+          setLoading(false);
+          return;
+        }
+
+        if (descripcion.length > 5000) {
+          setError('La descripción no puede exceder 5000 caracteres');
+          setLoading(false);
+          return;
+        }
 
         if (formData.usuarios_asignados.length === 0) {
           setError('Debe asignar al menos un usuario');
@@ -1205,9 +986,16 @@
           return;
         }
 
+        const fiscaliaFinal = formData.fiscalia === 'Otro' ? formData.fiscalia_otra : formData.fiscalia;
+        
+        if (!fiscaliaFinal) {
+          setError('Debe seleccionar una fiscalía');
+          setLoading(false);
+          return;
+        }
+
         try {
           const { data: { user } } = await supabase.auth.getUser();
-          console.log('📝 Usuario:', user.id);
 
           const { data: pericia, error: periciaError } = await supabase
             .from('pericias')
@@ -1215,8 +1003,8 @@
               fecha: formData.fecha,
               hora: formData.hora,
               numero_sgsp: formData.numero_sgsp,
-              pericia_solicitada: formData.pericia_solicitada,
-              fiscalia: formData.fiscalia,
+              pericia_solicitada: descripcion,
+              fiscalia: fiscaliaFinal,
               plazo: formData.plazo,
               numero_novedad: formData.numero_novedad,
               turno: formData.turno,
@@ -1225,12 +1013,7 @@
             .select()
             .single();
 
-          if (periciaError) {
-            console.error('❌ Error pericia:', periciaError);
-            throw periciaError;
-          }
-
-          console.log('✅ Pericia creada:', pericia.id);
+          if (periciaError) throw periciaError;
 
           const asignaciones = formData.usuarios_asignados.map(userId => ({
             pericia_id: pericia.id,
@@ -1241,16 +1024,11 @@
             .from('asignaciones')
             .insert(asignaciones);
 
-          if (asignacionError) {
-            console.error('❌ Error asignaciones:', asignacionError);
-            throw asignacionError;
-          }
+          if (asignacionError) throw asignacionError;
 
-          console.log('✅ Asignaciones creadas');
           alert('Pericia creada exitosamente');
           onSuccess();
         } catch (err) {
-          console.error('❌ ERROR:', err);
           setError('Error: ' + err.message);
         } finally {
           setLoading(false);
@@ -1282,15 +1060,24 @@
               <div className="form-group">
                 <label className="form-label">Turno</label>
                 <select className="form-control" value={formData.turno} onChange={(e) => setFormData({...formData, turno: e.target.value})} required>
-                  <option value="1er Turno">🌅 1er Turno</option>
-                  <option value="2do Turno">☀️ 2do Turno</option>
-                  <option value="3er Turno">🌙 3er Turno</option>
+                  <option value="1er Turno">1er Turno</option>
+                  <option value="2do Turno">2do Turno</option>
+                  <option value="3er Turno">3er Turno</option>
                 </select>
               </div>
               <div className="form-group">
                 <label className="form-label">Fiscalía</label>
-                <input type="text" className="form-control" value={formData.fiscalia} onChange={(e) => setFormData({...formData, fiscalia: e.target.value})} required />
+                <select className="form-control" value={formData.fiscalia} onChange={(e) => setFormData({...formData, fiscalia: e.target.value})} required>
+                  <option value="">Seleccionar...</option>
+                  {FISCALIAS.map(f => <option key={f} value={f}>{f}</option>)}
+                </select>
               </div>
+              {formData.fiscalia === 'Otro' && (
+                <div className="form-group">
+                  <label className="form-label">Especificar Fiscalía</label>
+                  <input type="text" className="form-control" value={formData.fiscalia_otra} onChange={(e) => setFormData({...formData, fiscalia_otra: e.target.value})} required />
+                </div>
+              )}
               <div className="form-group">
                 <label className="form-label">Plazo</label>
                 <input type="date" className="form-control" value={formData.plazo} onChange={(e) => setFormData({...formData, plazo: e.target.value})} required />
@@ -1299,7 +1086,19 @@
 
             <div className="form-group">
               <label className="form-label">Pericia Solicitada</label>
-              <textarea className="form-control" rows="4" value={formData.pericia_solicitada} onChange={(e) => setFormData({...formData, pericia_solicitada: e.target.value})} required />
+              <textarea 
+                className="form-control" 
+                rows="4" 
+                value={formData.pericia_solicitada} 
+                onChange={(e) => setFormData({...formData, pericia_solicitada: e.target.value})} 
+                required 
+                minLength="20"
+                maxLength="5000"
+              />
+              <div className={`char-counter ${!esValido && contadorChars > 0 ? 'error' : ''}`}>
+                {contadorChars} / 5000 caracteres
+                {contadorChars > 0 && contadorChars < 20 && <span> - ⚠️ Mínimo 20 caracteres</span>}
+              </div>
             </div>
 
             <div className="form-group">
@@ -1316,7 +1115,7 @@
               />
             </div>
 
-            <button type="submit" className="btn btn-primary" disabled={loading}>
+            <button type="submit" className="btn btn-primary" disabled={loading || !esValido}>
               {loading ? '⏳ Guardando...' : '✅ Crear Pericia'}
             </button>
           </form>
@@ -1324,7 +1123,108 @@
       );
     }
 
-    // Gestión de Usuarios
+    // Modal Editar Usuario
+    function ModalEditarUsuario({ usuario, onClose, onGuardar }) {
+      const [rol, setRol] = useState(usuario.rol);
+      const [turno, setTurno] = useState(usuario.turno || '');
+      const [activo, setActivo] = useState(usuario.activo);
+      const [loading, setLoading] = useState(false);
+      const [error, setError] = useState('');
+
+      const handleGuardar = async () => {
+        setLoading(true);
+        setError('');
+
+        try {
+          const turnoFinal = ['administrador', 'supervisor'].includes(rol) ? null : turno || null;
+
+          const { error: updateError } = await supabase
+            .from('usuarios')
+            .update({
+              rol: rol,
+              turno: turnoFinal,
+              activo: activo
+            })
+            .eq('id', usuario.id);
+
+          if (updateError) throw updateError;
+          onGuardar();
+        } catch (err) {
+          setError(err.message);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      const esAdminOSupervisor = ['administrador', 'supervisor'].includes(rol);
+
+      return (
+        <div className="modal-overlay" onClick={onClose}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>✏️ Editar Usuario</h3>
+              <button className="close-btn" onClick={onClose}>×</button>
+            </div>
+
+            {error && <div className="alert alert-error">{error}</div>}
+
+            <div className="form-group">
+              <label className="form-label">Usuario</label>
+              <input type="text" className="form-control" value={usuario.username} disabled />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Nombre</label>
+              <input type="text" className="form-control" value={usuario.nombre_completo} disabled />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Rol</label>
+              <select className="form-control" value={rol} onChange={(e) => setRol(e.target.value)}>
+                <option value="administrador">👑 Administrador</option>
+                <option value="supervisor">👁️ Supervisor</option>
+                <option value="encargado">🎖️ Encargado</option>
+                <option value="usuario">👤 Usuario</option>
+              </select>
+            </div>
+
+            {!esAdminOSupervisor && (
+              <div className="form-group">
+                <label className="form-label">Turno</label>
+                <select className="form-control" value={turno} onChange={(e) => setTurno(e.target.value)}>
+                  <option value="">Seleccionar...</option>
+                  <option value="1er Turno">1er Turno</option>
+                  <option value="2do Turno">2do Turno</option>
+                  <option value="3er Turno">3er Turno</option>
+                </select>
+              </div>
+            )}
+
+            {esAdminOSupervisor && (
+              <div className="alert" style={{background: '#bee3f8', color: '#2c5282', border: 'none'}}>
+                ℹ️ Administradores y Supervisores ven todos los turnos
+              </div>
+            )}
+
+            <div className="form-group">
+              <label style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+                <input type="checkbox" checked={activo} onChange={(e) => setActivo(e.target.checked)} style={{width: 'auto'}} />
+                <span className="form-label" style={{marginBottom: 0}}>Usuario Activo</span>
+              </label>
+            </div>
+
+            <div style={{display: 'flex', gap: '10px', marginTop: '20px'}}>
+              <button className="btn btn-success" onClick={handleGuardar} disabled={loading} style={{flex: 1}}>
+                {loading ? 'Guardando...' : '💾 Guardar'}
+              </button>
+              <button className="btn btn-secondary" onClick={onClose} disabled={loading}>Cancelar</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Gestión Usuarios Component
     function GestionUsuarios({ usuarios, onRecargar }) {
       const [usuarioEditar, setUsuarioEditar] = useState(null);
 
@@ -1348,38 +1248,11 @@
                   <tr key={usuario.id}>
                     <td>{usuario.username}</td>
                     <td>{usuario.nombre_completo}</td>
+                    <td><span className={`user-badge ${usuario.rol}`}>{usuario.rol}</span></td>
+                    <td>{usuario.turno || <span style={{color: '#a0aec0'}}>Todos</span>}</td>
+                    <td><span className={`badge ${usuario.activo ? 'badge-contestada' : 'badge-pendiente'}`}>{usuario.activo ? 'Activo' : 'Inactivo'}</span></td>
                     <td>
-                      <span className={`user-badge ${usuario.rol}`}>
-                        {usuario.rol === 'administrador' && '👑'}
-                        {usuario.rol === 'supervisor' && '👁️'}
-                        {usuario.rol === 'encargado' && '🎖️'}
-                        {usuario.rol === 'usuario' && '👤'}
-                        {' '}{usuario.rol}
-                      </span>
-                    </td>
-                    <td>
-                      {usuario.turno ? (
-                        <span className="badge">
-                          {usuario.turno === '1er Turno' && '🌅'} 
-                          {usuario.turno === '2do Turno' && '☀️'} 
-                          {usuario.turno === '3er Turno' && '🌙'}
-                          {' '}{usuario.turno}
-                        </span>
-                      ) : (
-                        <span style={{color: '#a0aec0'}}>Todos</span>
-                      )}
-                    </td>
-                    <td>
-                      <span className={`badge ${usuario.activo ? 'badge-contestada' : 'badge-pendiente'}`}>
-                        {usuario.activo ? 'Activo' : 'Inactivo'}
-                      </span>
-                    </td>
-                    <td>
-                      <button
-                        className="btn btn-primary"
-                        style={{fontSize: '12px', padding: '6px 12px'}}
-                        onClick={() => setUsuarioEditar(usuario)}
-                      >
+                      <button className="btn btn-primary" style={{fontSize: '12px', padding: '6px 12px'}} onClick={() => setUsuarioEditar(usuario)}>
                         ✏️ Editar
                       </button>
                     </td>
@@ -1396,7 +1269,7 @@
               onGuardar={() => {
                 setUsuarioEditar(null);
                 onRecargar();
-                alert('Usuario actualizado correctamente');
+                alert('Usuario actualizado');
               }}
             />
           )}
