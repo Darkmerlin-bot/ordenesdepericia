@@ -14,7 +14,7 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
       min-height: 100vh;
       padding: 20px;
     }
@@ -22,26 +22,26 @@
     .header {
       background: white;
       padding: 20px 30px;
-      border-radius: 15px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
       margin-bottom: 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-    .header h1 { color: #2d3748; font-size: 24px; font-weight: 700; }
-    .user-info { display: flex; align-items: center; gap: 20px; }
+    .header h1 { color: #1a1a2e; font-size: 24px; font-weight: 700; }
+    .user-info { display: flex; align-items: center; gap: 15px; }
     .user-badge {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: #1a1a2e;
       color: white;
       padding: 8px 16px;
-      border-radius: 20px;
+      border-radius: 8px;
       font-weight: 600;
       font-size: 14px;
     }
-    .user-badge.administrador { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-    .user-badge.supervisor { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
-    .user-badge.encargado { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+    .user-badge.administrador { background: #dc2626; }
+    .user-badge.supervisor { background: #2563eb; }
+    .user-badge.encargado { background: #059669; }
     .btn {
       padding: 10px 20px;
       border: none;
@@ -49,36 +49,46 @@
       font-size: 14px;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.3s;
+      transition: all 0.2s;
       display: inline-flex;
       align-items: center;
       gap: 8px;
     }
-    .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
-    .btn-danger { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
-    .btn-warning { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; }
-    .btn-secondary { background: #e2e8f0; color: #4a5568; }
-    .btn-success { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; }
-    .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .btn-primary { background: #1a1a2e; color: white; }
+    .btn-primary:hover { background: #2d2d44; }
+    .btn-danger { background: #dc2626; color: white; }
+    .btn-danger:hover { background: #b91c1c; }
+    .btn-warning { background: #d97706; color: white; }
+    .btn-warning:hover { background: #b45309; }
+    .btn-secondary { background: #e5e7eb; color: #374151; }
+    .btn-secondary:hover { background: #d1d5db; }
+    .btn-success { background: #059669; color: white; }
+    .btn-success:hover { background: #047857; }
+    .btn-info { background: #2563eb; color: white; }
+    .btn-info:hover { background: #1d4ed8; }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
     .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-    .tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+    .tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
     .tab {
       background: white;
       padding: 12px 24px;
-      border-radius: 10px;
+      border-radius: 8px;
       cursor: pointer;
       font-weight: 600;
-      transition: all 0.3s;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      transition: all 0.2s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      color: #374151;
     }
-    .tab.active { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+    .tab:hover { background: #f3f4f6; }
+    .tab.active { background: #1a1a2e; color: white; }
     .card {
       background: white;
-      border-radius: 15px;
+      border-radius: 12px;
       padding: 25px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
       margin-bottom: 20px;
     }
+    .card h2 { color: #1a1a2e; margin-bottom: 20px; font-size: 20px; }
     .loading {
       display: flex;
       flex-direction: column;
@@ -102,21 +112,21 @@
     .login-card {
       background: white;
       padding: 40px;
-      border-radius: 20px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
     }
-    .login-title { font-size: 28px; font-weight: 700; text-align: center; color: #2d3748; margin-bottom: 30px; }
+    .login-title { font-size: 28px; font-weight: 700; text-align: center; color: #1a1a2e; margin-bottom: 30px; }
     .form-group { margin-bottom: 20px; }
-    .form-label { display: block; margin-bottom: 8px; font-weight: 600; color: #4a5568; }
+    .form-label { display: block; margin-bottom: 8px; font-weight: 600; color: #374151; }
     .form-control {
       width: 100%;
       padding: 12px;
-      border: 2px solid #e2e8f0;
+      border: 2px solid #e5e7eb;
       border-radius: 8px;
       font-size: 14px;
-      transition: border-color 0.3s;
+      transition: border-color 0.2s;
     }
-    .form-control:focus { outline: none; border-color: #667eea; }
+    .form-control:focus { outline: none; border-color: #1a1a2e; }
     .form-row {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -152,10 +162,10 @@
       font-size: 12px;
       font-weight: 600;
     }
-    .badge-pendiente { background: #fed7d7; color: #c53030; }
-    .badge-en_proceso { background: #feebc8; color: #c05621; }
-    .badge-contestada { background: #c6f6d5; color: #2f855a; }
-    .badge-urgente { background: #f093fb; color: white; animation: pulse 2s infinite; }
+    .badge-pendiente { background: #fef2f2; color: #dc2626; }
+    .badge-en_proceso { background: #fffbeb; color: #d97706; }
+    .badge-contestada { background: #ecfdf5; color: #059669; }
+    .badge-urgente { background: #dc2626; color: white; animation: pulse 2s infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
     .usuarios-selector {
       border: 2px solid #e2e8f0;
@@ -218,9 +228,9 @@
     }
     .usuario-checkbox:hover { background: #edf2f7; border-color: #cbd5e0; }
     .usuario-checkbox.selected {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: #1a1a2e;
       color: white;
-      border-color: #667eea;
+      border-color: #1a1a2e;
     }
     .select-all-turno {
       font-size: 12px;
@@ -251,7 +261,7 @@
     }
     .modal-content {
       background: white;
-      border-radius: 15px;
+      border-radius: 12px;
       max-width: 800px;
       width: 100%;
       max-height: 90vh;
@@ -264,9 +274,9 @@
       align-items: center;
       margin-bottom: 20px;
       padding-bottom: 15px;
-      border-bottom: 2px solid #e2e8f0;
+      border-bottom: 2px solid #e5e7eb;
     }
-    .modal-header h3 { font-size: 20px; color: #2d3748; }
+    .modal-header h3 { font-size: 20px; color: #1a1a2e; }
     .close-btn {
       background: none;
       border: none;
@@ -315,8 +325,8 @@
       font-size: 14px;
     }
     .usuario-asignado-item.contestado {
-      background: #c6f6d5;
-      border-left: 3px solid #48bb78;
+      background: #ecfdf5;
+      border-left: 3px solid #059669;
     }
     .btn-group {
       display: flex;
@@ -333,7 +343,7 @@
       padding: 15px;
       background: white;
       border-radius: 8px;
-      border-left: 3px solid #667eea;
+      border-left: 3px solid #1a1a2e;
     }
     .contestacion-header {
       display: flex;
@@ -343,12 +353,111 @@
       color: #718096;
     }
     .mis-pericias-badge {
-      background: #667eea;
+      background: #1a1a2e;
       color: white;
       padding: 2px 8px;
       border-radius: 10px;
       font-size: 10px;
       margin-left: 8px;
+    }
+    .admin-tools {
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .admin-tools-title {
+      font-weight: 600;
+      color: #374151;
+      margin-right: 10px;
+    }
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    
+    /* Estilos de Impresión */
+    @media print {
+      body {
+        background: white !important;
+        padding: 0 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .container {
+        max-width: 100% !important;
+      }
+      .card {
+        box-shadow: none !important;
+        border: 1px solid #e5e7eb;
+        break-inside: avoid;
+      }
+      .print-header {
+        text-align: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #1a1a2e;
+      }
+      .print-header h1 {
+        font-size: 22px;
+        color: #1a1a2e;
+        margin-bottom: 5px;
+      }
+      .print-header p {
+        color: #6b7280;
+        font-size: 12px;
+      }
+      .print-only {
+        display: block !important;
+      }
+      table {
+        font-size: 11px;
+      }
+      th, td {
+        padding: 8px !important;
+      }
+      .badge {
+        border: 1px solid currentColor;
+      }
+      .pericia-print-item {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+        break-inside: avoid;
+      }
+      .pericia-print-item h4 {
+        color: #1a1a2e;
+        margin-bottom: 10px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #e5e7eb;
+      }
+      .pericia-print-row {
+        display: flex;
+        margin-bottom: 5px;
+      }
+      .pericia-print-label {
+        font-weight: 600;
+        width: 120px;
+        color: #374151;
+      }
+      .pericia-print-value {
+        flex: 1;
+      }
+    }
+    .print-only {
+      display: none;
     }
   </style>
 </head>
@@ -684,7 +793,7 @@
 
             {loading ? (
               <div style={{textAlign: 'center', padding: '20px'}}>
-                <div className="spinner" style={{margin: '0 auto 10px', borderColor: '#667eea', borderTopColor: 'transparent'}}></div>
+                <div className="spinner" style={{margin: '0 auto 10px', borderColor: '#1a1a2e', borderTopColor: 'transparent'}}></div>
                 Cargando...
               </div>
             ) : (
@@ -1645,6 +1754,357 @@
         }
       };
 
+      // ============================================
+      // FUNCIONES DE BACKUP Y RESTAURACIÓN
+      // ============================================
+      const handleBackup = async () => {
+        try {
+          // Obtener todos los datos
+          const { data: periciasData } = await supabase
+            .from('pericias')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+          const { data: asignacionesData } = await supabase
+            .from('asignaciones')
+            .select('*');
+
+          const { data: contestacionesData } = await supabase
+            .from('contestaciones')
+            .select('*');
+
+          const { data: usuariosData } = await supabase
+            .from('usuarios')
+            .select('id, username, nombre_completo, email, rol, turno, activo');
+
+          const backup = {
+            version: '1.0',
+            fecha: new Date().toISOString(),
+            generado_por: usuarioActual.nombre_completo,
+            datos: {
+              pericias: periciasData || [],
+              asignaciones: asignacionesData || [],
+              contestaciones: contestacionesData || [],
+              usuarios: usuariosData || []
+            }
+          };
+
+          // Crear y descargar archivo
+          const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `backup_pericias_${new Date().toISOString().split('T')[0]}.json`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+
+          alert(`✅ Backup generado exitosamente\n\nContenido:\n- ${periciasData?.length || 0} pericias\n- ${asignacionesData?.length || 0} asignaciones\n- ${contestacionesData?.length || 0} contestaciones\n- ${usuariosData?.length || 0} usuarios`);
+        } catch (error) {
+          alert('❌ Error al generar backup: ' + error.message);
+        }
+      };
+
+      const handleRestore = () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        
+        input.onchange = async (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+
+          try {
+            const text = await file.text();
+            const backup = JSON.parse(text);
+
+            if (!backup.version || !backup.datos) {
+              throw new Error('Archivo de backup inválido');
+            }
+
+            const confirmacion = confirm(
+              `⚠️ RESTAURAR BACKUP ⚠️\n\n` +
+              `Fecha del backup: ${new Date(backup.fecha).toLocaleString('es-UY')}\n` +
+              `Generado por: ${backup.generado_por}\n\n` +
+              `Contenido:\n` +
+              `- ${backup.datos.pericias?.length || 0} pericias\n` +
+              `- ${backup.datos.asignaciones?.length || 0} asignaciones\n` +
+              `- ${backup.datos.contestaciones?.length || 0} contestaciones\n\n` +
+              `¿Desea continuar? Los datos existentes con el mismo ID serán actualizados.`
+            );
+
+            if (!confirmacion) return;
+
+            let restaurados = { pericias: 0, asignaciones: 0, contestaciones: 0 };
+
+            // Restaurar pericias
+            if (backup.datos.pericias?.length > 0) {
+              for (const pericia of backup.datos.pericias) {
+                const { error } = await supabase
+                  .from('pericias')
+                  .upsert(pericia, { onConflict: 'id' });
+                if (!error) restaurados.pericias++;
+              }
+            }
+
+            // Restaurar asignaciones
+            if (backup.datos.asignaciones?.length > 0) {
+              for (const asig of backup.datos.asignaciones) {
+                const { error } = await supabase
+                  .from('asignaciones')
+                  .upsert(asig, { onConflict: 'id' });
+                if (!error) restaurados.asignaciones++;
+              }
+            }
+
+            // Restaurar contestaciones
+            if (backup.datos.contestaciones?.length > 0) {
+              for (const cont of backup.datos.contestaciones) {
+                const { error } = await supabase
+                  .from('contestaciones')
+                  .upsert(cont, { onConflict: 'id' });
+                if (!error) restaurados.contestaciones++;
+              }
+            }
+
+            alert(
+              `✅ Restauración completada\n\n` +
+              `Restaurados:\n` +
+              `- ${restaurados.pericias} pericias\n` +
+              `- ${restaurados.asignaciones} asignaciones\n` +
+              `- ${restaurados.contestaciones} contestaciones`
+            );
+
+            cargarDatos();
+          } catch (error) {
+            alert('❌ Error al restaurar: ' + error.message);
+          }
+        };
+
+        input.click();
+      };
+
+      // ============================================
+      // FUNCIÓN DE IMPRESIÓN
+      // ============================================
+      const handleImprimir = async () => {
+        // Obtener pericias pendientes con asignaciones
+        const { data: periciasImprimir } = await supabase
+          .from('pericias')
+          .select('*')
+          .is('deleted_at', null)
+          .in('estado', ['pendiente', 'en_proceso'])
+          .order('plazo', { ascending: true });
+
+        if (!periciasImprimir || periciasImprimir.length === 0) {
+          alert('No hay pericias pendientes para imprimir');
+          return;
+        }
+
+        // Obtener asignaciones para cada pericia
+        const periciasConAsignaciones = await Promise.all(
+          periciasImprimir.map(async (pericia) => {
+            const { data: asigs } = await supabase
+              .from('asignaciones')
+              .select('usuarios(nombre_completo)')
+              .eq('pericia_id', pericia.id);
+            
+            return {
+              ...pericia,
+              asignados: asigs?.map(a => a.usuarios?.nombre_completo).filter(Boolean) || []
+            };
+          })
+        );
+
+        // Crear ventana de impresión
+        const printWindow = window.open('', '_blank');
+        const fechaHoy = new Date().toLocaleDateString('es-UY', { 
+          weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+        });
+
+        printWindow.document.write(`
+          <!DOCTYPE html>
+          <html lang="es">
+          <head>
+            <meta charset="UTF-8">
+            <title>Listado de Pericias Pendientes</title>
+            <style>
+              * { margin: 0; padding: 0; box-sizing: border-box; }
+              body { 
+                font-family: Arial, sans-serif; 
+                padding: 20px;
+                font-size: 12px;
+                line-height: 1.4;
+              }
+              .header {
+                text-align: center;
+                margin-bottom: 25px;
+                padding-bottom: 15px;
+                border-bottom: 2px solid #1a1a2e;
+              }
+              .header h1 { font-size: 20px; color: #1a1a2e; margin-bottom: 5px; }
+              .header p { color: #666; font-size: 11px; }
+              .stats {
+                display: flex;
+                justify-content: space-around;
+                margin-bottom: 20px;
+                padding: 10px;
+                background: #f5f5f5;
+                border-radius: 5px;
+              }
+              .stat { text-align: center; }
+              .stat-number { font-size: 24px; font-weight: bold; color: #1a1a2e; }
+              .stat-label { font-size: 10px; color: #666; }
+              .pericia-item {
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                padding: 12px;
+                margin-bottom: 12px;
+                page-break-inside: avoid;
+              }
+              .pericia-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 10px;
+                padding-bottom: 8px;
+                border-bottom: 1px solid #eee;
+              }
+              .pericia-numero { font-weight: bold; font-size: 14px; color: #1a1a2e; }
+              .pericia-estado {
+                padding: 3px 10px;
+                border-radius: 10px;
+                font-size: 10px;
+                font-weight: bold;
+              }
+              .estado-pendiente { background: #fef2f2; color: #dc2626; }
+              .estado-en_proceso { background: #fffbeb; color: #d97706; }
+              .pericia-row {
+                display: flex;
+                margin-bottom: 4px;
+              }
+              .pericia-label {
+                font-weight: 600;
+                width: 100px;
+                color: #444;
+              }
+              .pericia-value { flex: 1; }
+              .pericia-descripcion {
+                margin-top: 10px;
+                padding: 8px;
+                background: #f9f9f9;
+                border-radius: 4px;
+                font-size: 11px;
+              }
+              .urgente {
+                border-color: #dc2626;
+                border-width: 2px;
+              }
+              .urgente .pericia-header {
+                background: #fef2f2;
+                margin: -12px -12px 10px -12px;
+                padding: 10px 12px;
+                border-radius: 4px 4px 0 0;
+              }
+              .footer {
+                margin-top: 30px;
+                padding-top: 15px;
+                border-top: 1px solid #ddd;
+                text-align: center;
+                font-size: 10px;
+                color: #999;
+              }
+              @media print {
+                body { padding: 10px; }
+                .pericia-item { margin-bottom: 10px; }
+              }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <h1>🔬 Sistema de Pericias Forenses</h1>
+              <p>Listado de Pericias Pendientes - ${fechaHoy}</p>
+            </div>
+            
+            <div class="stats">
+              <div class="stat">
+                <div class="stat-number">${periciasConAsignaciones.length}</div>
+                <div class="stat-label">Total Pendientes</div>
+              </div>
+              <div class="stat">
+                <div class="stat-number">${periciasConAsignaciones.filter(p => {
+                  const dias = Math.ceil((new Date(p.plazo) - new Date()) / (1000 * 60 * 60 * 24));
+                  return dias <= 2;
+                }).length}</div>
+                <div class="stat-label">Urgentes (≤2 días)</div>
+              </div>
+              <div class="stat">
+                <div class="stat-number">${periciasConAsignaciones.filter(p => p.estado === 'pendiente').length}</div>
+                <div class="stat-label">Sin Iniciar</div>
+              </div>
+              <div class="stat">
+                <div class="stat-number">${periciasConAsignaciones.filter(p => p.estado === 'en_proceso').length}</div>
+                <div class="stat-label">En Proceso</div>
+              </div>
+            </div>
+
+            ${periciasConAsignaciones.map(p => {
+              const diasRestantes = Math.ceil((new Date(p.plazo) - new Date()) / (1000 * 60 * 60 * 24));
+              const esUrgente = diasRestantes <= 2;
+              return `
+                <div class="pericia-item ${esUrgente ? 'urgente' : ''}">
+                  <div class="pericia-header">
+                    <span class="pericia-numero">#${p.numero_sgsp} ${esUrgente ? '🔥 URGENTE' : ''}</span>
+                    <span class="pericia-estado estado-${p.estado}">${p.estado.toUpperCase().replace('_', ' ')}</span>
+                  </div>
+                  <div class="pericia-row">
+                    <span class="pericia-label">Turno:</span>
+                    <span class="pericia-value">${p.turno}</span>
+                  </div>
+                  <div class="pericia-row">
+                    <span class="pericia-label">Fiscalía:</span>
+                    <span class="pericia-value">${p.fiscalia}</span>
+                  </div>
+                  <div class="pericia-row">
+                    <span class="pericia-label">Fecha:</span>
+                    <span class="pericia-value">${new Date(p.fecha).toLocaleDateString('es-UY')} ${p.hora || ''}</span>
+                  </div>
+                  <div class="pericia-row">
+                    <span class="pericia-label">Plazo:</span>
+                    <span class="pericia-value" style="color: ${esUrgente ? '#dc2626' : 'inherit'}; font-weight: ${esUrgente ? 'bold' : 'normal'}">
+                      ${new Date(p.plazo).toLocaleDateString('es-UY')} (${diasRestantes} días)
+                    </span>
+                  </div>
+                  <div class="pericia-row">
+                    <span class="pericia-label">Asignados:</span>
+                    <span class="pericia-value">${p.asignados.length > 0 ? p.asignados.join(', ') : 'Sin asignar'}</span>
+                  </div>
+                  ${p.numero_novedad ? `
+                  <div class="pericia-row">
+                    <span class="pericia-label">Novedad:</span>
+                    <span class="pericia-value">${p.numero_novedad}</span>
+                  </div>` : ''}
+                  <div class="pericia-descripcion">
+                    <strong>Descripción:</strong> ${p.pericia_solicitada.substring(0, 300)}${p.pericia_solicitada.length > 300 ? '...' : ''}
+                  </div>
+                </div>
+              `;
+            }).join('')}
+
+            <div class="footer">
+              Generado el ${new Date().toLocaleString('es-UY')} por ${usuarioActual.nombre_completo}
+            </div>
+
+            <script>
+              window.onload = function() { window.print(); }
+            </script>
+          </body>
+          </html>
+        `);
+        printWindow.document.close();
+      };
+
       if (loading) {
         return (
           <div className="loading">
@@ -1718,6 +2178,32 @@
               <span style={{color: 'white', alignSelf: 'center'}}>
                 {pericias.length} pericia(s) encontrada(s)
               </span>
+            </div>
+          )}
+
+          {/* Herramientas de Administrador */}
+          {(esAdmin || esSupervisor) && ['pendientes', 'contestadas', 'todas'].includes(vistaActual) && (
+            <div className="card" style={{padding: '15px', marginBottom: '15px'}}>
+              <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px'}}>
+                <div style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
+                  <span style={{fontWeight: '600', color: '#374151'}}>🛠️ Herramientas:</span>
+                  {(esAdmin || esSupervisor) && vistaActual === 'pendientes' && (
+                    <button className="btn btn-info" onClick={handleImprimir}>
+                      🖨️ Imprimir Pendientes
+                    </button>
+                  )}
+                </div>
+                {esAdmin && (
+                  <div style={{display: 'flex', gap: '10px'}}>
+                    <button className="btn btn-success" onClick={handleBackup}>
+                      💾 Backup
+                    </button>
+                    <button className="btn btn-warning" onClick={handleRestore}>
+                      📂 Restaurar
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
