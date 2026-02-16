@@ -56,6 +56,7 @@
     }
     .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
     .btn-danger { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
+    .btn-warning { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; }
     .btn-secondary { background: #e2e8f0; color: #4a5568; }
     .btn-success { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; }
     .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
@@ -128,16 +129,9 @@
       margin-bottom: 20px;
       font-weight: 500;
     }
-    .alert-error {
-      background: #fed7d7;
-      color: #c53030;
-      border-left: 4px solid #f56565;
-    }
-    .alert-success {
-      background: #c6f6d5;
-      color: #2f855a;
-      border-left: 4px solid #48bb78;
-    }
+    .alert-error { background: #fed7d7; color: #c53030; border-left: 4px solid #f56565; }
+    .alert-success { background: #c6f6d5; color: #2f855a; border-left: 4px solid #48bb78; }
+    .alert-warning { background: #feebc8; color: #c05621; border-left: 4px solid #f6ad55; }
     .table-container { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; }
     th {
@@ -319,6 +313,10 @@
       border-radius: 6px;
       font-size: 14px;
     }
+    .btn-group {
+      display: flex;
+      gap: 8px;
+    }
   </style>
 </head>
 <body>
@@ -332,16 +330,13 @@
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const FISCALIAS = [
-      '1° Turno',
-      '2° Turno',
-      '3° Turno',
-      '4° Turno',
-      '5° Turno',
-      '6° Turno',
-      'Flagrancia',
-      'Crimen Organizado',
-      'Género',
-      'Otro'
+      '1er Turno',
+      '2do Turno',
+      '3er Turno',
+      '4to Turno',
+      '5to Turno',
+      '1er Turno Delitos Sexuales',
+      '2do Turno Delitos Sexuales'
     ];
 
     // Login Component
@@ -640,24 +635,49 @@
 
         const init = async () => {
           try {
-            const { data: { session } } = await supabase.auth.getSession();
+            // Timeout de 10 segundos para detectar si se queda atascado
+            const timeoutId = setTimeout(() => {
+              console.error('Timeout detectado - limpiando localStorage');
+              localStorage.clear();
+              window.location.reload();
+            }, 10000);
+
+            const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+            
+            clearTimeout(timeoutId);
+
+            if (sessionError) {
+              console.error('Error de sesión:', sessionError);
+              localStorage.clear();
+              setLoading(false);
+              return;
+            }
             
             if (session?.user) {
               setUser(session.user);
               
-              const { data: userData } = await supabase
+              const { data: userData, error: userError } = await supabase
                 .from('usuarios')
                 .select('*')
                 .eq('id', session.user.id)
                 .maybeSingle();
               
+              if (userError) {
+                console.error('Error al cargar usuario:', userError);
+                localStorage.clear();
+                await supabase.auth.signOut();
+                setLoading(false);
+                return;
+              }
+
               if (userData) {
                 setUsuarioActual(userData);
                 localStorage.setItem('usuarioActual', JSON.stringify(userData));
               }
             }
           } catch (error) {
-            console.error('Error:', error);
+            console.error('Error en init:', error);
+            localStorage.clear();
           } finally {
             setLoading(false);
           }
@@ -676,7 +696,7 @@
           } else if (event === 'SIGNED_OUT') {
             setUser(null);
             setUsuarioActual(null);
-            localStorage.removeItem('usuarioActual');
+            localStorage.clear();
           }
         });
 
@@ -693,21 +713,18 @@
         try {
           let query = supabase.from('pericias').select('*');
 
-          // Filtrar borradas excepto en vista archivadas
           if (vistaActual !== 'archivadas') {
             query = query.is('deleted_at', null);
           } else {
             query = query.not('deleted_at', 'is', null);
           }
 
-          // Filtrar por estado
           if (vistaActual === 'pendientes') {
             query = query.in('estado', ['pendiente', 'en_proceso']);
           } else if (vistaActual === 'contestadas') {
             query = query.eq('estado', 'contestada');
           }
 
-          // Filtrar por rol
           if (usuarioActual.rol === 'encargado' && usuarioActual.turno) {
             query = query.eq('turno', usuarioActual.turno);
           } else if (usuarioActual.rol === 'usuario') {
@@ -720,7 +737,6 @@
             query = query.in('id', periciaIds.length > 0 ? periciaIds : ['00000000-0000-0000-0000-000000000000']);
           }
 
-          // Filtro turno
           if (filtroTurno !== 'todos' && ['administrador', 'supervisor'].includes(usuarioActual.rol)) {
             query = query.eq('turno', filtroTurno);
           }
@@ -728,7 +744,6 @@
           const { data: periciasData } = await query.order('created_at', { ascending: false });
           setPericias(periciasData || []);
 
-          // Cargar usuarios
           if (['administrador', 'supervisor', 'encargado'].includes(usuarioActual.rol)) {
             const { data: usuariosData } = await supabase
               .from('usuarios')
@@ -744,7 +759,7 @@
 
       const handleLogout = async () => {
         await supabase.auth.signOut();
-        localStorage.removeItem('usuarioActual');
+        localStorage.clear();
         window.location.reload();
       };
 
@@ -762,6 +777,37 @@
           if (data && !data.success) throw new Error(data.error);
 
           alert('Pericia archivada correctamente');
+          cargarDatos();
+        } catch (error) {
+          alert('Error: ' + error.message);
+        }
+      };
+
+      const handleEliminarFisico = async (periciaId, numeroSgsp) => {
+        if (!confirm(`⚠️ ADVERTENCIA ⚠️\n\nEstás a punto de ELIMINAR PERMANENTEMENTE la pericia #${numeroSgsp}.\n\nEsta acción NO SE PUEDE DESHACER y NO quedará en auditoría.\n\nSolo deberías hacer esto si es una PRUEBA.\n\n¿Estás COMPLETAMENTE SEGURO?`)) {
+          return;
+        }
+
+        const confirmacion = prompt('Para confirmar, escribe: ELIMINAR');
+        if (confirmacion !== 'ELIMINAR') {
+          alert('Eliminación cancelada');
+          return;
+        }
+
+        try {
+          // Primero eliminar asignaciones y contestaciones
+          await supabase.from('asignaciones').delete().eq('pericia_id', periciaId);
+          await supabase.from('contestaciones').delete().eq('pericia_id', periciaId);
+
+          // Luego eliminar la pericia
+          const { error } = await supabase
+            .from('pericias')
+            .delete()
+            .eq('id', periciaId);
+
+          if (error) throw error;
+
+          alert('Pericia eliminada permanentemente');
           cargarDatos();
         } catch (error) {
           alert('Error: ' + error.message);
@@ -841,8 +887,10 @@
             <ListaPericias
               pericias={pericias}
               esArchivadas={vistaActual === 'archivadas'}
+              esAdmin={esAdmin}
               onVerDetalle={(p) => setPericiaDetalle(p)}
               onArchivar={esAdmin && vistaActual !== 'archivadas' ? handleArchivarPericia : null}
+              onEliminar={esAdmin && vistaActual !== 'archivadas' ? handleEliminarFisico : null}
               onRestaurar={esAdmin && vistaActual === 'archivadas' ? handleRestaurarPericia : null}
             />
           )}
@@ -872,7 +920,7 @@
     }
 
     // Lista Pericias Component
-    function ListaPericias({ pericias, esArchivadas, onVerDetalle, onArchivar, onRestaurar }) {
+    function ListaPericias({ pericias, esArchivadas, esAdmin, onVerDetalle, onArchivar, onEliminar, onRestaurar }) {
       if (pericias.length === 0) {
         return (
           <div className="card">
@@ -920,16 +968,23 @@
                         </span>
                       </td>
                       <td onClick={(e) => e.stopPropagation()}>
-                        {onArchivar && (
-                          <button className="btn btn-danger" style={{fontSize: '12px', padding: '6px 12px'}} onClick={() => onArchivar(pericia.id)}>
-                            🗑️ Archivar
-                          </button>
-                        )}
-                        {onRestaurar && (
-                          <button className="btn btn-success" style={{fontSize: '12px', padding: '6px 12px'}} onClick={() => onRestaurar(pericia.id)}>
-                            ↩️ Restaurar
-                          </button>
-                        )}
+                        <div className="btn-group">
+                          {onArchivar && (
+                            <button className="btn btn-secondary" style={{fontSize: '12px', padding: '6px 12px'}} onClick={() => onArchivar(pericia.id)}>
+                              📦 Archivar
+                            </button>
+                          )}
+                          {onEliminar && (
+                            <button className="btn btn-danger" style={{fontSize: '12px', padding: '6px 12px'}} onClick={() => onEliminar(pericia.id, pericia.numero_sgsp)}>
+                              ⚠️ Eliminar
+                            </button>
+                          )}
+                          {onRestaurar && (
+                            <button className="btn btn-success" style={{fontSize: '12px', padding: '6px 12px'}} onClick={() => onRestaurar(pericia.id)}>
+                              ↩️ Restaurar
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );
@@ -951,7 +1006,6 @@
         numero_sgsp: '',
         pericia_solicitada: '',
         fiscalia: '',
-        fiscalia_otra: '',
         plazo: '',
         numero_novedad: '',
         turno: '1er Turno',
@@ -986,9 +1040,7 @@
           return;
         }
 
-        const fiscaliaFinal = formData.fiscalia === 'Otro' ? formData.fiscalia_otra : formData.fiscalia;
-        
-        if (!fiscaliaFinal) {
+        if (!formData.fiscalia) {
           setError('Debe seleccionar una fiscalía');
           setLoading(false);
           return;
@@ -1004,7 +1056,7 @@
               hora: formData.hora,
               numero_sgsp: formData.numero_sgsp,
               pericia_solicitada: descripcion,
-              fiscalia: fiscaliaFinal,
+              fiscalia: formData.fiscalia,
               plazo: formData.plazo,
               numero_novedad: formData.numero_novedad,
               turno: formData.turno,
@@ -1072,12 +1124,6 @@
                   {FISCALIAS.map(f => <option key={f} value={f}>{f}</option>)}
                 </select>
               </div>
-              {formData.fiscalia === 'Otro' && (
-                <div className="form-group">
-                  <label className="form-label">Especificar Fiscalía</label>
-                  <input type="text" className="form-control" value={formData.fiscalia_otra} onChange={(e) => setFormData({...formData, fiscalia_otra: e.target.value})} required />
-                </div>
-              )}
               <div className="form-group">
                 <label className="form-label">Plazo</label>
                 <input type="date" className="form-control" value={formData.plazo} onChange={(e) => setFormData({...formData, plazo: e.target.value})} required />
@@ -1102,7 +1148,7 @@
             </div>
 
             <div className="form-group">
-              <label className="form-label">Número de Novedad</label>
+              <label className="form-label">Número de Novedad (opcional)</label>
               <input type="text" className="form-control" value={formData.numero_novedad} onChange={(e) => setFormData({...formData, numero_novedad: e.target.value})} />
             </div>
 
@@ -1128,6 +1174,7 @@
       const [rol, setRol] = useState(usuario.rol);
       const [turno, setTurno] = useState(usuario.turno || '');
       const [activo, setActivo] = useState(usuario.activo);
+      const [nombreCompleto, setNombreCompleto] = useState(usuario.nombre_completo);
       const [loading, setLoading] = useState(false);
       const [error, setError] = useState('');
 
@@ -1143,7 +1190,8 @@
             .update({
               rol: rol,
               turno: turnoFinal,
-              activo: activo
+              activo: activo,
+              nombre_completo: nombreCompleto
             })
             .eq('id', usuario.id);
 
@@ -1174,8 +1222,14 @@
             </div>
 
             <div className="form-group">
-              <label className="form-label">Nombre</label>
-              <input type="text" className="form-control" value={usuario.nombre_completo} disabled />
+              <label className="form-label">Nombre Completo</label>
+              <input 
+                type="text" 
+                className="form-control" 
+                value={nombreCompleto} 
+                onChange={(e) => setNombreCompleto(e.target.value)}
+                required
+              />
             </div>
 
             <div className="form-group">
