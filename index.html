@@ -4,16 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sistema de Pericias Forenses</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔬</text></svg>">
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
       background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
       min-height: 100vh;
       padding: 20px;
@@ -494,23 +493,31 @@
     ];
 
     // ============================================
-    // FUNCIÓN GLOBAL: Registrar Logs
+    // FUNCIÓN GLOBAL: Registrar Logs (con timeout)
     // ============================================
     const registrarLogGlobal = async (userId, userName, accion, entidad, entidad_id, descripcion, datos_extra = null) => {
+      // No bloquear si falla - timeout de 3 segundos
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout')), 3000)
+      );
+      
+      const insertPromise = supabase.from('logs_actividad').insert({
+        usuario_id: userId,
+        usuario_nombre: userName,
+        accion: accion,
+        entidad: entidad,
+        entidad_id: entidad_id,
+        descripcion: descripcion,
+        datos_extra: datos_extra,
+        ip_address: null,
+        user_agent: navigator.userAgent
+      });
+      
       try {
-        await supabase.from('logs_actividad').insert({
-          usuario_id: userId,
-          usuario_nombre: userName,
-          accion: accion,
-          entidad: entidad,
-          entidad_id: entidad_id,
-          descripcion: descripcion,
-          datos_extra: datos_extra,
-          ip_address: null,
-          user_agent: navigator.userAgent
-        });
+        await Promise.race([insertPromise, timeoutPromise]);
       } catch (error) {
-        console.error('Error al registrar log:', error);
+        // Silenciosamente ignorar errores de log
+        console.log('Log no registrado:', accion);
       }
     };
 
@@ -1531,6 +1538,7 @@
       const [user, setUser] = useState(null);
       const [usuarioActual, setUsuarioActual] = useState(null);
       const [loading, setLoading] = useState(true);
+      const [loadingData, setLoadingData] = useState(false);
       const [vistaActual, setVistaActual] = useState('pendientes');
       const [pericias, setPericias] = useState([]);
       const [usuarios, setUsuarios] = useState([]);
@@ -1551,11 +1559,15 @@
 
         const init = async () => {
           try {
+            // Timeout reducido a 8 segundos
             const timeoutId = setTimeout(() => {
-              console.error('Timeout detectado - limpiando localStorage');
+              console.error('Timeout detectado - limpiando y recargando');
               localStorage.clear();
-              window.location.reload();
-            }, 15000);
+              sessionStorage.clear();
+              setLoading(false);
+              setUser(null);
+              setUsuarioActual(null);
+            }, 8000);
 
             const { data: { session }, error: sessionError } = await supabase.auth.getSession();
             
@@ -1570,6 +1582,27 @@
             
             if (session?.user) {
               setUser(session.user);
+              
+              // Si ya tenemos el usuario en cache, usarlo inmediatamente
+              const cachedData = localStorage.getItem('usuarioActual');
+              if (cachedData) {
+                try {
+                  const cached = JSON.parse(cachedData);
+                  if (cached.id === session.user.id) {
+                    setUsuarioActual(cached);
+                    setLoading(false);
+                    // Actualizar en background
+                    supabase.from('usuarios').select('*').eq('id', session.user.id).maybeSingle()
+                      .then(({ data }) => {
+                        if (data) {
+                          setUsuarioActual(data);
+                          localStorage.setItem('usuarioActual', JSON.stringify(data));
+                        }
+                      });
+                    return;
+                  }
+                } catch (e) {}
+              }
               
               const { data: userData, error: userError } = await supabase
                 .from('usuarios')
@@ -1600,25 +1633,31 @@
 
         init();
 
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
           if (event === 'SIGNED_IN' && session?.user) {
             setUser(session.user);
-            const { data: userData } = await supabase.from('usuarios').select('*').eq('id', session.user.id).maybeSingle();
-            if (userData) {
-              setUsuarioActual(userData);
-              localStorage.setItem('usuarioActual', JSON.stringify(userData));
+            
+            // Cargar usuario en background sin bloquear
+            supabase.from('usuarios').select('*').eq('id', session.user.id).maybeSingle()
+              .then(({ data: userData }) => {
+                if (userData) {
+                  setUsuarioActual(userData);
+                  localStorage.setItem('usuarioActual', JSON.stringify(userData));
+                  
+                  // Registrar log en background (sin esperar)
+                  registrarLogGlobal(
+                    userData.id,
+                    userData.nombre_completo,
+                    'LOGIN',
+                    'sesion',
+                    null,
+                    `Inicio de sesión: ${userData.username}`,
+                    { rol: userData.rol, turno: userData.turno }
+                  ).catch(() => {});
+                }
+              })
+              .catch(err => console.error('Error cargando usuario:', err));
               
-              // Registrar log de inicio de sesión
-              await registrarLogGlobal(
-                userData.id,
-                userData.nombre_completo,
-                'LOGIN',
-                'sesion',
-                null,
-                `Inicio de sesión: ${userData.username}`,
-                { rol: userData.rol, turno: userData.turno }
-              );
-            }
           } else if (event === 'SIGNED_OUT') {
             setUser(null);
             setUsuarioActual(null);
@@ -1636,6 +1675,10 @@
       }, [user, usuarioActual, vistaActual, filtroTurno]);
 
       const cargarDatos = async () => {
+        // Evitar cargas duplicadas
+        if (loadingData) return;
+        setLoadingData(true);
+        
         try {
           let query = supabase.from('pericias').select('*');
 
@@ -1689,38 +1732,41 @@
           }
         } catch (error) {
           console.error('Error:', error);
+        } finally {
+          setLoadingData(false);
         }
       };
 
-      const handleLogout = async () => {
-        try {
-          // Registrar log de cierre de sesión
-          await registrarLog('LOGOUT', 'sesion', null, 'Cierre de sesión');
-        } catch (e) {
-          console.log('No se pudo registrar log de logout');
-        }
-        
-        // Limpiar todo primero
+      const handleLogout = () => {
+        // Limpiar todo PRIMERO sin esperar nada
         localStorage.clear();
         sessionStorage.clear();
         
-        // Forzar cierre de sesión
-        try {
-          await supabase.auth.signOut({ scope: 'global' });
-        } catch (e) {
-          console.log('Error en signOut:', e);
-        }
-        
-        // Limpiar estados
+        // Limpiar estados inmediatamente
         setUser(null);
         setUsuarioActual(null);
         setPericias([]);
         setUsuarios([]);
+        setLogs([]);
         
-        // Forzar recarga después de un pequeño delay
-        setTimeout(() => {
-          window.location.href = window.location.pathname;
-        }, 100);
+        // Intentar registrar log y cerrar sesión en background (sin esperar)
+        supabase.from('logs_actividad').insert({
+          usuario_id: user?.id,
+          usuario_nombre: usuarioActual?.nombre_completo,
+          accion: 'LOGOUT',
+          entidad: 'sesion',
+          entidad_id: null,
+          descripcion: 'Cierre de sesión',
+          datos_extra: null,
+          ip_address: null,
+          user_agent: navigator.userAgent
+        }).then(() => {}).catch(() => {});
+        
+        // Cerrar sesión sin esperar
+        supabase.auth.signOut().then(() => {}).catch(() => {});
+        
+        // Forzar recarga inmediata
+        window.location.href = window.location.pathname;
       };
 
       // ============================================
