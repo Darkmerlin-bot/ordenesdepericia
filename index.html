@@ -522,6 +522,25 @@
     };
 
     // ============================================
+    // FUNCIÓN: Formatear fecha sin problema de timezone
+    // ============================================
+    const formatearFecha = (fechaStr) => {
+      if (!fechaStr) return 'N/A';
+      // Dividir la fecha para evitar problema de timezone
+      const partes = fechaStr.split('T')[0].split('-');
+      if (partes.length !== 3) return fechaStr;
+      const [año, mes, dia] = partes;
+      return `${dia}/${mes}/${año}`;
+    };
+
+    const formatearFechaHora = (fechaStr) => {
+      if (!fechaStr) return 'N/A';
+      const fecha = new Date(fechaStr);
+      // Ajustar al timezone local
+      return fecha.toLocaleString('es-UY');
+    };
+
+    // ============================================
     // COMPONENTE: Login
     // ============================================
     function Login() {
@@ -529,6 +548,25 @@
       const [password, setPassword] = useState('');
       const [loading, setLoading] = useState(false);
       const [error, setError] = useState('');
+
+      // Registrar intento fallido de login
+      const registrarIntentoFallido = async (usuario, motivo) => {
+        try {
+          await supabase.from('logs_actividad').insert({
+            usuario_id: null,
+            usuario_nombre: usuario || 'Desconocido',
+            accion: 'LOGIN_FALLIDO',
+            entidad: 'sesion',
+            entidad_id: null,
+            descripcion: `Intento fallido: ${motivo}`,
+            datos_extra: { username_intentado: usuario, motivo: motivo },
+            ip_address: null,
+            user_agent: navigator.userAgent
+          });
+        } catch (e) {
+          console.log('No se pudo registrar intento fallido');
+        }
+      };
 
       const handleSubmit = async (e) => {
         e.preventDefault();
@@ -542,15 +580,25 @@
             .eq('username', username)
             .single();
 
-          if (userError || !usuarioData) throw new Error('Usuario no encontrado');
-          if (!usuarioData.activo) throw new Error('Usuario inactivo. Contacte al administrador.');
+          if (userError || !usuarioData) {
+            await registrarIntentoFallido(username, 'Usuario no encontrado');
+            throw new Error('Usuario no encontrado');
+          }
+          
+          if (!usuarioData.activo) {
+            await registrarIntentoFallido(username, 'Usuario inactivo');
+            throw new Error('Usuario inactivo. Contacte al administrador.');
+          }
 
           const { error } = await supabase.auth.signInWithPassword({
             email: usuarioData.email,
             password: password
           });
 
-          if (error) throw error;
+          if (error) {
+            await registrarIntentoFallido(username, 'Contraseña incorrecta');
+            throw new Error('Contraseña incorrecta');
+          }
         } catch (err) {
           setError(err.message);
           setLoading(false);
@@ -702,7 +750,7 @@
     }
 
     // ============================================
-    // COMPONENTE: Modal Detalle Pericia (con contestación)
+    // COMPONENTE: Modal Detalle Pericia (con contestación y edición)
     // ============================================
     function ModalDetallePericia({ pericia, usuarioActual, onClose, onActualizar }) {
       const [usuariosAsignados, setUsuariosAsignados] = useState([]);
@@ -715,6 +763,22 @@
       const [error, setError] = useState('');
       const [yaContesto, setYaContesto] = useState(false);
       const [esAsignado, setEsAsignado] = useState(false);
+      
+      // Estados para edición
+      const [modoEdicion, setModoEdicion] = useState(false);
+      const [guardando, setGuardando] = useState(false);
+      const [datosEditados, setDatosEditados] = useState({
+        numero_sgsp: pericia.numero_sgsp,
+        fecha: pericia.fecha?.split('T')[0] || '',
+        hora: pericia.hora || '',
+        fiscalia: pericia.fiscalia,
+        turno: pericia.turno,
+        plazo: pericia.plazo?.split('T')[0] || '',
+        numero_novedad: pericia.numero_novedad || '',
+        pericia_solicitada: pericia.pericia_solicitada
+      });
+
+      const puedeEditar = ['administrador', 'supervisor', 'encargado'].includes(usuarioActual.rol);
 
       useEffect(() => {
         cargarDetalle();
@@ -819,6 +883,69 @@
         }
       };
 
+      // Función para guardar edición
+      const handleGuardarEdicion = async () => {
+        setGuardando(true);
+        setError('');
+
+        try {
+          // Corregir fechas para evitar desfase de timezone
+          const fechaCorregida = datosEditados.fecha + 'T12:00:00';
+          const plazoCorregido = datosEditados.plazo + 'T12:00:00';
+
+          const { error: updateError } = await supabase
+            .from('pericias')
+            .update({
+              numero_sgsp: datosEditados.numero_sgsp,
+              fecha: fechaCorregida,
+              hora: datosEditados.hora,
+              fiscalia: datosEditados.fiscalia,
+              turno: datosEditados.turno,
+              plazo: plazoCorregido,
+              numero_novedad: datosEditados.numero_novedad,
+              pericia_solicitada: datosEditados.pericia_solicitada
+            })
+            .eq('id', pericia.id);
+
+          if (updateError) throw updateError;
+
+          // Registrar log
+          await registrarLogGlobal(
+            usuarioActual.id,
+            usuarioActual.nombre_completo,
+            'EDITAR',
+            'pericia',
+            pericia.id,
+            `Pericia #${datosEditados.numero_sgsp} editada`,
+            { campos_editados: Object.keys(datosEditados) }
+          );
+
+          alert('✅ Pericia actualizada correctamente');
+          setModoEdicion(false);
+          if (onActualizar) onActualizar();
+          onClose();
+        } catch (err) {
+          setError('Error al guardar: ' + err.message);
+        } finally {
+          setGuardando(false);
+        }
+      };
+
+      const cancelarEdicion = () => {
+        setDatosEditados({
+          numero_sgsp: pericia.numero_sgsp,
+          fecha: pericia.fecha?.split('T')[0] || '',
+          hora: pericia.hora || '',
+          fiscalia: pericia.fiscalia,
+          turno: pericia.turno,
+          plazo: pericia.plazo?.split('T')[0] || '',
+          numero_novedad: pericia.numero_novedad || '',
+          pericia_solicitada: pericia.pericia_solicitada
+        });
+        setModoEdicion(false);
+        setError('');
+      };
+
       const diasRestantes = Math.ceil((new Date(pericia.plazo) - new Date()) / (1000 * 60 * 60 * 24));
       const usuariosQueContestaron = contestaciones.map(c => c.usuario_id);
 
@@ -826,24 +953,140 @@
         <div className="modal-overlay" onClick={onClose}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>📋 Pericia #{pericia.numero_sgsp}</h3>
-              <button className="close-btn" onClick={onClose}>×</button>
+              <h3>📋 Pericia #{modoEdicion ? datosEditados.numero_sgsp : pericia.numero_sgsp}</h3>
+              <div style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
+                {puedeEditar && !modoEdicion && (
+                  <button className="btn btn-warning" onClick={() => setModoEdicion(true)} style={{padding: '6px 12px'}}>
+                    ✏️ Editar
+                  </button>
+                )}
+                <button className="close-btn" onClick={onClose}>×</button>
+              </div>
             </div>
+
+            {error && <div className="alert alert-error">{error}</div>}
 
             {loading ? (
               <div style={{textAlign: 'center', padding: '20px'}}>
                 <div className="spinner" style={{margin: '0 auto 10px', borderColor: '#1a1a2e', borderTopColor: 'transparent'}}></div>
                 Cargando...
               </div>
+            ) : modoEdicion ? (
+              // MODO EDICIÓN
+              <div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label className="form-label">N° SGSP *</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={datosEditados.numero_sgsp}
+                      onChange={(e) => setDatosEditados({...datosEditados, numero_sgsp: e.target.value})}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">N° Novedad</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={datosEditados.numero_novedad}
+                      onChange={(e) => setDatosEditados({...datosEditados, numero_novedad: e.target.value})}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label className="form-label">Fecha *</label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      value={datosEditados.fecha}
+                      onChange={(e) => setDatosEditados({...datosEditados, fecha: e.target.value})}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Hora</label>
+                    <input
+                      type="time"
+                      className="form-control"
+                      value={datosEditados.hora}
+                      onChange={(e) => setDatosEditados({...datosEditados, hora: e.target.value})}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Plazo *</label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      value={datosEditados.plazo}
+                      onChange={(e) => setDatosEditados({...datosEditados, plazo: e.target.value})}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label className="form-label">Turno *</label>
+                    <select
+                      className="form-control"
+                      value={datosEditados.turno}
+                      onChange={(e) => setDatosEditados({...datosEditados, turno: e.target.value})}
+                    >
+                      {TURNOS.map(t => <option key={t} value={t}>{t}</option>)}
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Fiscalía *</label>
+                    <select
+                      className="form-control"
+                      value={datosEditados.fiscalia}
+                      onChange={(e) => setDatosEditados({...datosEditados, fiscalia: e.target.value})}
+                    >
+                      {FISCALIAS.map(f => <option key={f} value={f}>{f}</option>)}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Pericia Solicitada *</label>
+                  <textarea
+                    className="form-control"
+                    rows="6"
+                    value={datosEditados.pericia_solicitada}
+                    onChange={(e) => setDatosEditados({...datosEditados, pericia_solicitada: e.target.value})}
+                  />
+                </div>
+
+                <div style={{display: 'flex', gap: '10px', marginTop: '20px'}}>
+                  <button 
+                    className="btn btn-success" 
+                    onClick={handleGuardarEdicion}
+                    disabled={guardando}
+                    style={{flex: 1}}
+                  >
+                    {guardando ? '⏳ Guardando...' : '💾 Guardar Cambios'}
+                  </button>
+                  <button 
+                    className="btn btn-secondary" 
+                    onClick={cancelarEdicion}
+                    disabled={guardando}
+                    style={{flex: 1}}
+                  >
+                    ❌ Cancelar
+                  </button>
+                </div>
+              </div>
             ) : (
+              // MODO VISUALIZACIÓN
               <>
                 <div className="detalle-section">
                   <div className="detalle-label">📌 Información General</div>
                   <p><strong>Turno:</strong> {pericia.turno}</p>
                   <p><strong>Fiscalía:</strong> {pericia.fiscalia}</p>
-                  <p><strong>Fecha:</strong> {new Date(pericia.fecha).toLocaleDateString('es-UY')} {pericia.hora}</p>
+                  <p><strong>Fecha:</strong> {formatearFecha(pericia.fecha)} {pericia.hora}</p>
                   <p>
-                    <strong>Plazo:</strong> {new Date(pericia.plazo).toLocaleDateString('es-UY')} 
+                    <strong>Plazo:</strong> {formatearFecha(pericia.plazo)} 
                     <span style={{
                       color: diasRestantes <= 0 ? '#c53030' : diasRestantes <= 2 ? '#c05621' : '#2d3748',
                       marginLeft: '8px',
@@ -892,7 +1135,7 @@
                         <div className="contestacion-header">
                           <span><strong>{cont.nombre_usuario || cont.usuarios?.nombre_completo}</strong></span>
                           <span>
-                            📅 {cont.fecha_respuesta ? new Date(cont.fecha_respuesta).toLocaleDateString('es-UY') : 'N/A'}
+                            📅 {cont.fecha_respuesta ? formatearFecha(cont.fecha_respuesta) : 'N/A'}
                             {cont.hora_respuesta && ` 🕐 ${cont.hora_respuesta}`}
                           </span>
                         </div>
@@ -976,9 +1219,195 @@
     }
 
     // ============================================
+    // COMPONENTE: Modal Editar Pericia
+    // ============================================
+    function ModalEditarPericia({ pericia, usuarios, usuarioActual, onClose, onSuccess }) {
+      const [formData, setFormData] = useState({
+        numero_sgsp: pericia.numero_sgsp || '',
+        turno: pericia.turno || '',
+        fiscalia: pericia.fiscalia || '',
+        fecha: pericia.fecha || '',
+        hora: pericia.hora || '',
+        plazo: pericia.plazo || '',
+        numero_novedad: pericia.numero_novedad || '',
+        pericia_solicitada: pericia.pericia_solicitada || ''
+      });
+      const [loading, setLoading] = useState(false);
+      const [error, setError] = useState('');
+
+      const handleChange = (field, value) => {
+        setFormData(prev => ({ ...prev, [field]: value }));
+      };
+
+      const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
+
+        try {
+          const { error: updateError } = await supabase
+            .from('pericias')
+            .update({
+              numero_sgsp: formData.numero_sgsp,
+              turno: formData.turno,
+              fiscalia: formData.fiscalia,
+              fecha: formData.fecha,
+              hora: formData.hora,
+              plazo: formData.plazo,
+              numero_novedad: formData.numero_novedad || null,
+              pericia_solicitada: formData.pericia_solicitada
+            })
+            .eq('id', pericia.id);
+
+          if (updateError) throw updateError;
+
+          // Registrar log
+          await registrarLogGlobal(
+            usuarioActual.id,
+            usuarioActual.nombre_completo,
+            'EDITAR',
+            'pericia',
+            pericia.id,
+            `Pericia #${formData.numero_sgsp} editada`,
+            { cambios: formData }
+          );
+
+          alert('✅ Pericia actualizada correctamente');
+          onSuccess();
+          onClose();
+        } catch (err) {
+          setError('Error: ' + err.message);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      return (
+        <div className="modal-overlay" onClick={onClose}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{maxWidth: '700px'}}>
+            <div className="modal-header">
+              <h3>✏️ Editar Pericia #{pericia.numero_sgsp}</h3>
+              <button className="close-btn" onClick={onClose}>×</button>
+            </div>
+
+            {error && <div className="alert alert-error">{error}</div>}
+
+            <form onSubmit={handleSubmit}>
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">N° SGSP *</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={formData.numero_sgsp}
+                    onChange={(e) => handleChange('numero_sgsp', e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Turno *</label>
+                  <select
+                    className="form-control"
+                    value={formData.turno}
+                    onChange={(e) => handleChange('turno', e.target.value)}
+                    required
+                  >
+                    <option value="">Seleccionar...</option>
+                    {TURNOS.map(t => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Fiscalía *</label>
+                  <select
+                    className="form-control"
+                    value={formData.fiscalia}
+                    onChange={(e) => handleChange('fiscalia', e.target.value)}
+                    required
+                  >
+                    <option value="">Seleccionar...</option>
+                    {FISCALIAS.map(f => <option key={f} value={f}>{f}</option>)}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">N° Novedad</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={formData.numero_novedad}
+                    onChange={(e) => handleChange('numero_novedad', e.target.value)}
+                    placeholder="Opcional"
+                  />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Fecha *</label>
+                  <input
+                    type="date"
+                    className="form-control"
+                    value={formData.fecha}
+                    onChange={(e) => handleChange('fecha', e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Hora</label>
+                  <input
+                    type="time"
+                    className="form-control"
+                    value={formData.hora}
+                    onChange={(e) => handleChange('hora', e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Plazo *</label>
+                  <input
+                    type="date"
+                    className="form-control"
+                    value={formData.plazo}
+                    onChange={(e) => handleChange('plazo', e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Pericia Solicitada *</label>
+                <textarea
+                  className="form-control"
+                  rows="5"
+                  value={formData.pericia_solicitada}
+                  onChange={(e) => handleChange('pericia_solicitada', e.target.value)}
+                  required
+                />
+              </div>
+
+              <div style={{display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '20px'}}>
+                <button type="button" className="btn btn-secondary" onClick={onClose} disabled={loading}>
+                  Cancelar
+                </button>
+                <button type="submit" className="btn btn-success" disabled={loading}>
+                  {loading ? '⏳ Guardando...' : '💾 Guardar Cambios'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      );
+    }
+
+    // ============================================
     // COMPONENTE: Lista de Pericias
     // ============================================
-    function ListaPericias({ pericias, esArchivadas, usuarioActual, onVerDetalle, onArchivar, onEliminar, onRestaurar }) {
+    function ListaPericias({ pericias, esArchivadas, usuarioActual, onVerDetalle, onEditar, onArchivar, onEliminar, onRestaurar }) {
+      const esAdmin = usuarioActual?.rol === 'administrador';
+      const esSupervisor = usuarioActual?.rol === 'supervisor';
+      const puedeEditar = esAdmin || esSupervisor;
+      
       if (pericias.length === 0) {
         return (
           <div className="card">
@@ -992,8 +1421,6 @@
           </div>
         );
       }
-
-      const esAdmin = usuarioActual.rol === 'administrador';
 
       return (
         <div className="card">
@@ -1019,13 +1446,13 @@
                     <tr key={pericia.id} onClick={() => onVerDetalle(pericia)}>
                       <td><strong>{pericia.numero_sgsp}</strong></td>
                       <td><span className="badge">{pericia.turno}</span></td>
-                      <td>{new Date(pericia.fecha).toLocaleDateString('es-UY')}</td>
+                      <td>{formatearFecha(pericia.fecha)}</td>
                       <td style={{maxWidth: '250px'}}>
                         {pericia.pericia_solicitada.substring(0, 60)}
                         {pericia.pericia_solicitada.length > 60 ? '...' : ''}
                       </td>
                       <td>
-                        {new Date(pericia.plazo).toLocaleDateString('es-UY')}
+                        {formatearFecha(pericia.plazo)}
                         {esUrgente && <span className="badge badge-urgente" style={{marginLeft: '8px'}}>🔥</span>}
                       </td>
                       <td>
@@ -1042,6 +1469,15 @@
                           >
                             👁️ Ver
                           </button>
+                          {onEditar && puedeEditar && !esArchivadas && (
+                            <button 
+                              className="btn btn-info" 
+                              style={{fontSize: '12px', padding: '6px 12px'}} 
+                              onClick={() => onEditar(pericia)}
+                            >
+                              ✏️
+                            </button>
+                          )}
                           {onArchivar && esAdmin && (
                             <button 
                               className="btn btn-warning" 
@@ -1154,15 +1590,20 @@
         try {
           const { data: { user } } = await supabase.auth.getUser();
 
+          // Corregir fechas para evitar desfase de timezone
+          // Agregamos T12:00:00 para que quede en mediodía y no haya problemas de zona horaria
+          const fechaCorregida = formData.fecha + 'T12:00:00';
+          const plazoCorregido = formData.plazo + 'T12:00:00';
+
           const { data: pericia, error: periciaError } = await supabase
             .from('pericias')
             .insert({
-              fecha: formData.fecha,
+              fecha: fechaCorregida,
               hora: formData.hora,
               numero_sgsp: formData.numero_sgsp,
               pericia_solicitada: descripcion,
               fiscalia: formData.fiscalia,
-              plazo: formData.plazo,
+              plazo: plazoCorregido,
               numero_novedad: formData.numero_novedad || null,
               turno: formData.turno,
               creado_por: user.id,
@@ -1544,6 +1985,7 @@
       const [usuarios, setUsuarios] = useState([]);
       const [filtroTurno, setFiltroTurno] = useState('todos');
       const [periciaDetalle, setPericiaDetalle] = useState(null);
+      const [periciaEditar, setPericiaEditar] = useState(null);
       const [logs, setLogs] = useState([]);
       const [loadingLogs, setLoadingLogs] = useState(false);
 
@@ -2267,12 +2709,12 @@
                   </div>
                   <div class="pericia-row">
                     <span class="pericia-label">Fecha:</span>
-                    <span class="pericia-value">${new Date(p.fecha).toLocaleDateString('es-UY')} ${p.hora || ''}</span>
+                    <span class="pericia-value">${formatearFecha(p.fecha)} ${p.hora || ''}</span>
                   </div>
                   <div class="pericia-row">
                     <span class="pericia-label">Plazo:</span>
                     <span class="pericia-value" style="color: ${esUrgente ? '#dc2626' : 'inherit'}; font-weight: ${esUrgente ? 'bold' : 'normal'}">
-                      ${new Date(p.plazo).toLocaleDateString('es-UY')} (${diasRestantes} días)
+                      ${formatearFecha(p.plazo)} (${diasRestantes} días)
                     </span>
                   </div>
                   <div class="pericia-row">
@@ -2417,6 +2859,7 @@
               esArchivadas={vistaActual === 'archivadas'}
               usuarioActual={usuarioActual}
               onVerDetalle={(p) => setPericiaDetalle(p)}
+              onEditar={(esAdmin || esSupervisor) && vistaActual !== 'archivadas' ? (p) => setPericiaEditar(p) : null}
               onArchivar={esAdmin && vistaActual !== 'archivadas' ? handleArchivarPericia : null}
               onEliminar={esAdmin ? handleEliminarFisico : null}
               onRestaurar={esAdmin && vistaActual === 'archivadas' ? handleRestaurarPericia : null}
@@ -2485,17 +2928,19 @@
                           <td>
                             <span className={`badge ${
                               log.accion === 'CREAR' ? 'badge-contestada' :
+                              log.accion === 'EDITAR' ? 'badge-en_proceso' :
                               log.accion === 'ELIMINAR' ? 'badge-pendiente' :
                               log.accion === 'ARCHIVAR' ? 'badge-en_proceso' :
                               log.accion === 'CONTESTAR' ? 'badge-contestada' :
                               log.accion === 'LOGIN' ? 'badge-contestada' :
+                              log.accion === 'LOGIN_FALLIDO' ? 'badge-pendiente' :
                               log.accion === 'LOGOUT' ? 'badge-en_proceso' :
                               log.accion === 'BACKUP' ? 'badge-contestada' :
                               log.accion === 'RESTORE_BACKUP' ? 'badge-en_proceso' :
                               log.accion === 'RESTAURAR' ? 'badge-contestada' :
                               ''
                             }`}>
-                              {log.accion}
+                              {log.accion === 'LOGIN_FALLIDO' ? '⚠️ LOGIN FALLIDO' : log.accion}
                             </span>
                           </td>
                           <td style={{fontSize: '12px'}}>{log.entidad}</td>
