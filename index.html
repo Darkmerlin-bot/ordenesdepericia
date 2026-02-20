@@ -243,6 +243,7 @@
     .select-all-turno:hover { background: #edf2f7; }
     .filters { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
     select.form-control { width: auto; min-width: 150px; }
+    .btn-group { display: flex; gap: 5px; }
     .empty-state { text-align: center; padding: 60px 20px; color: #718096; }
     .empty-state-icon { font-size: 64px; margin-bottom: 20px; opacity: 0.5; }
     .modal-overlay {
@@ -1910,7 +1911,7 @@
     // ============================================
     // COMPONENTE: Gestión de Usuarios
     // ============================================
-    function GestionUsuarios({ usuarios, onRecargar }) {
+    function GestionUsuarios({ usuarios, onRecargar, onCambiarPassword }) {
       const [usuarioEditar, setUsuarioEditar] = useState(null);
 
       return (
@@ -1943,13 +1944,25 @@
                       </span>
                     </td>
                     <td>
-                      <button 
-                        className="btn btn-primary" 
-                        style={{fontSize: '12px', padding: '6px 12px'}} 
-                        onClick={() => setUsuarioEditar(usuario)}
-                      >
-                        ✏️ Editar
-                      </button>
+                      <div className="btn-group">
+                        <button 
+                          className="btn btn-primary" 
+                          style={{fontSize: '12px', padding: '6px 12px'}} 
+                          onClick={() => setUsuarioEditar(usuario)}
+                        >
+                          ✏️ Editar
+                        </button>
+                        {onCambiarPassword && (
+                          <button 
+                            className="btn btn-warning" 
+                            style={{fontSize: '12px', padding: '6px 12px'}} 
+                            onClick={() => onCambiarPassword(usuario)}
+                            title="Cambiar contraseña"
+                          >
+                            🔐
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -1973,6 +1986,146 @@
     }
 
     // ============================================
+    // COMPONENTE: Modal Cambiar Contraseña
+    // ============================================
+    function ModalCambiarPassword({ usuario, esPropio, onClose, onCambiar }) {
+      const [passwordActual, setPasswordActual] = useState('');
+      const [passwordNueva, setPasswordNueva] = useState('');
+      const [passwordConfirmar, setPasswordConfirmar] = useState('');
+      const [loading, setLoading] = useState(false);
+      const [error, setError] = useState('');
+      const [mostrarPasswords, setMostrarPasswords] = useState(false);
+
+      const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError('');
+
+        if (passwordNueva.length < 6) {
+          setError('La contraseña debe tener al menos 6 caracteres');
+          return;
+        }
+
+        if (passwordNueva !== passwordConfirmar) {
+          setError('Las contraseñas no coinciden');
+          return;
+        }
+
+        setLoading(true);
+
+        try {
+          if (esPropio) {
+            // Cambio de contraseña propia - verificar contraseña actual
+            const { error: signInError } = await supabase.auth.signInWithPassword({
+              email: usuario.email,
+              password: passwordActual
+            });
+
+            if (signInError) {
+              setError('La contraseña actual es incorrecta');
+              setLoading(false);
+              return;
+            }
+
+            // Actualizar contraseña
+            const { error: updateError } = await supabase.auth.updateUser({
+              password: passwordNueva
+            });
+
+            if (updateError) throw updateError;
+          } else {
+            // Cambio por admin - usar función RPC o actualización directa
+            // Nota: Esto requiere configuración especial en Supabase
+            const result = await onCambiar(usuario.id, passwordNueva);
+            if (!result.success) {
+              throw new Error(result.error);
+            }
+          }
+
+          alert('✅ Contraseña cambiada exitosamente');
+          onClose();
+        } catch (err) {
+          setError('Error: ' + err.message);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      return (
+        <div className="modal-overlay" onClick={onClose}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{maxWidth: '450px'}}>
+            <div className="modal-header">
+              <h3>🔐 {esPropio ? 'Cambiar Mi Contraseña' : `Cambiar Contraseña: ${usuario.nombre_completo}`}</h3>
+              <button className="close-btn" onClick={onClose}>×</button>
+            </div>
+
+            {error && <div className="alert alert-error">{error}</div>}
+
+            <form onSubmit={handleSubmit}>
+              {esPropio && (
+                <div className="form-group">
+                  <label className="form-label">Contraseña Actual *</label>
+                  <input
+                    type={mostrarPasswords ? 'text' : 'password'}
+                    className="form-control"
+                    value={passwordActual}
+                    onChange={(e) => setPasswordActual(e.target.value)}
+                    required
+                    disabled={loading}
+                  />
+                </div>
+              )}
+
+              <div className="form-group">
+                <label className="form-label">Nueva Contraseña * (mínimo 6 caracteres)</label>
+                <input
+                  type={mostrarPasswords ? 'text' : 'password'}
+                  className="form-control"
+                  value={passwordNueva}
+                  onChange={(e) => setPasswordNueva(e.target.value)}
+                  required
+                  disabled={loading}
+                  minLength={6}
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Confirmar Nueva Contraseña *</label>
+                <input
+                  type={mostrarPasswords ? 'text' : 'password'}
+                  className="form-control"
+                  value={passwordConfirmar}
+                  onChange={(e) => setPasswordConfirmar(e.target.value)}
+                  required
+                  disabled={loading}
+                />
+              </div>
+
+              <div className="form-group">
+                <label style={{display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer'}}>
+                  <input
+                    type="checkbox"
+                    checked={mostrarPasswords}
+                    onChange={(e) => setMostrarPasswords(e.target.checked)}
+                  />
+                  Mostrar contraseñas
+                </label>
+              </div>
+
+              <div style={{display: 'flex', gap: '10px', marginTop: '20px'}}>
+                <button type="submit" className="btn btn-primary" disabled={loading} style={{flex: 1}}>
+                  {loading ? '⏳ Guardando...' : '💾 Cambiar Contraseña'}
+                </button>
+                <button type="button" className="btn btn-secondary" onClick={onClose} disabled={loading} style={{flex: 1}}>
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      );
+    }
+
+    // ============================================
     // COMPONENTE PRINCIPAL: App
     // ============================================
     function App() {
@@ -1988,6 +2141,19 @@
       const [periciaEditar, setPericiaEditar] = useState(null);
       const [logs, setLogs] = useState([]);
       const [loadingLogs, setLoadingLogs] = useState(false);
+      
+      // Estados para cambio de contraseña
+      const [mostrarCambioPassword, setMostrarCambioPassword] = useState(false);
+      const [usuarioPasswordEditar, setUsuarioPasswordEditar] = useState(null);
+      
+      // Estados para estadísticas y reportes
+      const [fechaDesde, setFechaDesde] = useState(() => {
+        const d = new Date();
+        d.setMonth(d.getMonth() - 1);
+        return d.toISOString().split('T')[0];
+      });
+      const [fechaHasta, setFechaHasta] = useState(new Date().toISOString().split('T')[0]);
+      const [estadisticas, setEstadisticas] = useState({ pendientes: 0, enProceso: 0, contestadas: 0, total: 0 });
 
       useEffect(() => {
         const cachedUser = localStorage.getItem('usuarioActual');
@@ -2246,6 +2412,202 @@
           cargarLogs();
         }
       }, [vistaActual]);
+
+      // Cargar estadísticas cuando se cambia a la vista de estadísticas
+      useEffect(() => {
+        if (vistaActual === 'estadisticas' && (usuarioActual?.rol === 'administrador' || usuarioActual?.rol === 'supervisor')) {
+          cargarEstadisticas();
+        }
+      }, [vistaActual, fechaDesde, fechaHasta]);
+
+      // ============================================
+      // FUNCIÓN: Cargar Estadísticas
+      // ============================================
+      const cargarEstadisticas = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('pericias')
+            .select('estado, created_at')
+            .is('deleted_at', null)
+            .gte('created_at', fechaDesde + 'T00:00:00')
+            .lte('created_at', fechaHasta + 'T23:59:59');
+
+          if (error) throw error;
+
+          const stats = {
+            pendientes: data?.filter(p => p.estado === 'pendiente').length || 0,
+            enProceso: data?.filter(p => p.estado === 'en_proceso').length || 0,
+            contestadas: data?.filter(p => p.estado === 'contestada').length || 0,
+            total: data?.length || 0
+          };
+
+          setEstadisticas(stats);
+        } catch (error) {
+          console.error('Error al cargar estadísticas:', error);
+        }
+      };
+
+      // ============================================
+      // FUNCIÓN: Cambiar Contraseña
+      // ============================================
+      const handleCambiarPassword = async (usuarioId, nuevaPassword) => {
+        try {
+          // Usar la función de admin de Supabase para cambiar contraseña
+          const { error } = await supabase.auth.admin.updateUserById(usuarioId, {
+            password: nuevaPassword
+          });
+
+          if (error) {
+            // Si no tenemos permisos de admin, intentar con update de usuario actual
+            if (usuarioId === user?.id) {
+              const { error: updateError } = await supabase.auth.updateUser({
+                password: nuevaPassword
+              });
+              if (updateError) throw updateError;
+            } else {
+              throw new Error('No tienes permisos para cambiar la contraseña de otros usuarios. Contacta al administrador del sistema.');
+            }
+          }
+
+          // Registrar log
+          await registrarLog('CAMBIO_PASSWORD', 'usuario', usuarioId, 
+            usuarioId === user?.id ? 'Cambio de contraseña propia' : `Contraseña cambiada por admin`,
+            null
+          );
+
+          return { success: true };
+        } catch (error) {
+          return { success: false, error: error.message };
+        }
+      };
+
+      // ============================================
+      // FUNCIÓN: Imprimir Contestadas por Período
+      // ============================================
+      const handleImprimirContestadas = async () => {
+        const { data: periciasImprimir } = await supabase
+          .from('pericias')
+          .select('*')
+          .is('deleted_at', null)
+          .eq('estado', 'contestada')
+          .gte('created_at', fechaDesde + 'T00:00:00')
+          .lte('created_at', fechaHasta + 'T23:59:59')
+          .order('fecha', { ascending: false });
+
+        if (!periciasImprimir || periciasImprimir.length === 0) {
+          alert('No hay pericias contestadas en el período seleccionado');
+          return;
+        }
+
+        // Obtener contestaciones para cada pericia
+        const periciasConContestaciones = await Promise.all(
+          periciasImprimir.map(async (pericia) => {
+            const { data: conts } = await supabase
+              .from('contestaciones')
+              .select('nombre_usuario, fecha_respuesta, hora_respuesta, contestacion')
+              .eq('pericia_id', pericia.id)
+              .order('fecha_respuesta', { ascending: false });
+            
+            return {
+              ...pericia,
+              contestaciones: conts || []
+            };
+          })
+        );
+
+        // Crear ventana de impresión
+        const printWindow = window.open('', '_blank');
+        const fechaHoy = new Date().toLocaleDateString('es-UY', { 
+          weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+        });
+
+        printWindow.document.write(`
+          <!DOCTYPE html>
+          <html lang="es">
+          <head>
+            <meta charset="UTF-8">
+            <title>Pericias Contestadas - ${fechaDesde} a ${fechaHasta}</title>
+            <style>
+              * { margin: 0; padding: 0; box-sizing: border-box; }
+              body { font-family: Arial, sans-serif; padding: 20px; font-size: 12px; line-height: 1.4; }
+              .header { text-align: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #1a1a2e; }
+              .header h1 { font-size: 20px; color: #1a1a2e; margin-bottom: 5px; }
+              .header p { color: #666; font-size: 11px; }
+              .periodo { background: #f0f0f0; padding: 10px; border-radius: 5px; margin-bottom: 20px; text-align: center; }
+              .stats { display: flex; justify-content: center; gap: 30px; margin-bottom: 20px; }
+              .stat { text-align: center; }
+              .stat-number { font-size: 24px; font-weight: bold; color: #059669; }
+              .stat-label { font-size: 10px; color: #666; }
+              .pericia-item { border: 1px solid #ddd; border-radius: 6px; padding: 12px; margin-bottom: 15px; page-break-inside: avoid; }
+              .pericia-header { display: flex; justify-content: space-between; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #eee; }
+              .pericia-numero { font-weight: bold; font-size: 14px; color: #1a1a2e; }
+              .pericia-row { display: flex; margin-bottom: 4px; }
+              .pericia-label { font-weight: 600; width: 100px; color: #444; }
+              .pericia-value { flex: 1; }
+              .contestacion-box { background: #f9f9f9; padding: 10px; border-radius: 5px; margin-top: 10px; border-left: 3px solid #059669; }
+              .contestacion-header { font-weight: bold; margin-bottom: 5px; color: #059669; }
+              .footer { margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd; text-align: center; font-size: 10px; color: #999; }
+              @media print { body { padding: 10px; } }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <h1>🔬 Sistema de Pericias Forenses</h1>
+              <p>Reporte de Pericias Contestadas</p>
+            </div>
+            
+            <div class="periodo">
+              <strong>Período:</strong> ${new Date(fechaDesde).toLocaleDateString('es-UY')} al ${new Date(fechaHasta).toLocaleDateString('es-UY')}
+            </div>
+
+            <div class="stats">
+              <div class="stat">
+                <div class="stat-number">${periciasConContestaciones.length}</div>
+                <div class="stat-label">Pericias Contestadas</div>
+              </div>
+            </div>
+
+            ${periciasConContestaciones.map(p => `
+              <div class="pericia-item">
+                <div class="pericia-header">
+                  <span class="pericia-numero">#${p.numero_sgsp}</span>
+                  <span style="color: #059669; font-weight: bold;">✅ CONTESTADA</span>
+                </div>
+                <div class="pericia-row">
+                  <span class="pericia-label">Turno:</span>
+                  <span class="pericia-value">${p.turno}</span>
+                </div>
+                <div class="pericia-row">
+                  <span class="pericia-label">Fiscalía:</span>
+                  <span class="pericia-value">${p.fiscalia}</span>
+                </div>
+                <div class="pericia-row">
+                  <span class="pericia-label">Fecha:</span>
+                  <span class="pericia-value">${new Date(p.fecha).toLocaleDateString('es-UY')} ${p.hora || ''}</span>
+                </div>
+                ${p.contestaciones.map(c => `
+                  <div class="contestacion-box">
+                    <div class="contestacion-header">
+                      ${c.nombre_usuario} - ${c.fecha_respuesta ? new Date(c.fecha_respuesta).toLocaleDateString('es-UY') : ''} ${c.hora_respuesta || ''}
+                    </div>
+                    <div>${c.contestacion.substring(0, 500)}${c.contestacion.length > 500 ? '...' : ''}</div>
+                  </div>
+                `).join('')}
+              </div>
+            `).join('')}
+
+            <div class="footer">
+              Generado el ${new Date().toLocaleString('es-UY')} por ${usuarioActual.nombre_completo}
+            </div>
+
+            <scr` + `ipt>
+              window.onload = function() { window.print(); }
+            </scr` + `ipt>
+          </body>
+          </html>
+        `);
+        printWindow.document.close();
+      };
 
       const handleArchivarPericia = async (periciaId) => {
         const motivo = prompt('Motivo del archivo (será registrado en auditoría):');
@@ -2777,6 +3139,16 @@
                   ({usuarioActual.rol}{usuarioActual.turno ? ` - ${usuarioActual.turno}` : ''})
                 </span>
               </div>
+              <button 
+                className="btn btn-secondary" 
+                onClick={() => {
+                  setUsuarioPasswordEditar(usuarioActual);
+                  setMostrarCambioPassword(true);
+                }}
+                title="Cambiar mi contraseña"
+              >
+                🔐
+              </button>
               <button className="btn btn-secondary" onClick={handleLogout}>🚪 Salir</button>
             </div>
           </div>
@@ -2791,6 +3163,11 @@
             {puedeCrear && (
               <div className={`tab ${vistaActual === 'nueva' ? 'active' : ''}`} onClick={() => setVistaActual('nueva')}>
                 ➕ Nueva
+              </div>
+            )}
+            {(esAdmin || esSupervisor) && (
+              <div className={`tab ${vistaActual === 'estadisticas' ? 'active' : ''}`} onClick={() => setVistaActual('estadisticas')}>
+                📈 Estadísticas
               </div>
             )}
             {(esAdmin || esSupervisor) && (
@@ -2878,7 +3255,156 @@
           )}
 
           {vistaActual === 'usuarios' && esAdmin && (
-            <GestionUsuarios usuarios={usuarios} onRecargar={cargarDatos} />
+            <GestionUsuarios 
+              usuarios={usuarios} 
+              onRecargar={cargarDatos}
+              onCambiarPassword={(usuario) => {
+                setUsuarioPasswordEditar(usuario);
+                setMostrarCambioPassword(true);
+              }}
+            />
+          )}
+
+          {vistaActual === 'estadisticas' && (esAdmin || esSupervisor) && (
+            <div className="card">
+              <h2>📈 Estadísticas y Reportes</h2>
+              
+              {/* Filtros de período */}
+              <div style={{display: 'flex', gap: '15px', alignItems: 'flex-end', marginBottom: '25px', flexWrap: 'wrap', padding: '15px', background: '#f8fafc', borderRadius: '8px'}}>
+                <div className="form-group" style={{margin: 0}}>
+                  <label className="form-label">Desde</label>
+                  <input
+                    type="date"
+                    className="form-control"
+                    value={fechaDesde}
+                    onChange={(e) => setFechaDesde(e.target.value)}
+                  />
+                </div>
+                <div className="form-group" style={{margin: 0}}>
+                  <label className="form-label">Hasta</label>
+                  <input
+                    type="date"
+                    className="form-control"
+                    value={fechaHasta}
+                    onChange={(e) => setFechaHasta(e.target.value)}
+                  />
+                </div>
+                <button className="btn btn-primary" onClick={cargarEstadisticas}>
+                  🔄 Actualizar
+                </button>
+                <button className="btn btn-info" onClick={handleImprimirContestadas}>
+                  🖨️ Imprimir Contestadas
+                </button>
+              </div>
+
+              {/* Resumen numérico */}
+              <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '15px', marginBottom: '30px'}}>
+                <div style={{background: '#fef2f2', padding: '20px', borderRadius: '10px', textAlign: 'center'}}>
+                  <div style={{fontSize: '36px', fontWeight: 'bold', color: '#dc2626'}}>{estadisticas.pendientes}</div>
+                  <div style={{color: '#991b1b', fontWeight: '600'}}>Pendientes</div>
+                </div>
+                <div style={{background: '#fffbeb', padding: '20px', borderRadius: '10px', textAlign: 'center'}}>
+                  <div style={{fontSize: '36px', fontWeight: 'bold', color: '#d97706'}}>{estadisticas.enProceso}</div>
+                  <div style={{color: '#92400e', fontWeight: '600'}}>En Proceso</div>
+                </div>
+                <div style={{background: '#ecfdf5', padding: '20px', borderRadius: '10px', textAlign: 'center'}}>
+                  <div style={{fontSize: '36px', fontWeight: 'bold', color: '#059669'}}>{estadisticas.contestadas}</div>
+                  <div style={{color: '#065f46', fontWeight: '600'}}>Contestadas</div>
+                </div>
+                <div style={{background: '#f0f9ff', padding: '20px', borderRadius: '10px', textAlign: 'center'}}>
+                  <div style={{fontSize: '36px', fontWeight: 'bold', color: '#0284c7'}}>{estadisticas.total}</div>
+                  <div style={{color: '#075985', fontWeight: '600'}}>Total</div>
+                </div>
+              </div>
+
+              {/* Gráfico de barras */}
+              <div style={{background: '#f8fafc', padding: '20px', borderRadius: '10px'}}>
+                <h3 style={{marginBottom: '20px', color: '#374151'}}>📊 Distribución de Estados</h3>
+                <div style={{display: 'flex', alignItems: 'flex-end', gap: '20px', height: '200px', justifyContent: 'center'}}>
+                  {/* Barra Pendientes */}
+                  <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', width: '80px'}}>
+                    <div style={{
+                      width: '60px',
+                      height: `${estadisticas.total > 0 ? Math.max((estadisticas.pendientes / estadisticas.total) * 150, 10) : 10}px`,
+                      background: 'linear-gradient(180deg, #ef4444 0%, #dc2626 100%)',
+                      borderRadius: '8px 8px 0 0',
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      justifyContent: 'center',
+                      paddingTop: '5px',
+                      color: 'white',
+                      fontWeight: 'bold',
+                      fontSize: '14px',
+                      transition: 'height 0.5s ease'
+                    }}>
+                      {estadisticas.pendientes}
+                    </div>
+                    <div style={{marginTop: '10px', fontSize: '12px', color: '#6b7280', textAlign: 'center'}}>Pendientes</div>
+                  </div>
+                  
+                  {/* Barra En Proceso */}
+                  <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', width: '80px'}}>
+                    <div style={{
+                      width: '60px',
+                      height: `${estadisticas.total > 0 ? Math.max((estadisticas.enProceso / estadisticas.total) * 150, 10) : 10}px`,
+                      background: 'linear-gradient(180deg, #f59e0b 0%, #d97706 100%)',
+                      borderRadius: '8px 8px 0 0',
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      justifyContent: 'center',
+                      paddingTop: '5px',
+                      color: 'white',
+                      fontWeight: 'bold',
+                      fontSize: '14px',
+                      transition: 'height 0.5s ease'
+                    }}>
+                      {estadisticas.enProceso}
+                    </div>
+                    <div style={{marginTop: '10px', fontSize: '12px', color: '#6b7280', textAlign: 'center'}}>En Proceso</div>
+                  </div>
+                  
+                  {/* Barra Contestadas */}
+                  <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', width: '80px'}}>
+                    <div style={{
+                      width: '60px',
+                      height: `${estadisticas.total > 0 ? Math.max((estadisticas.contestadas / estadisticas.total) * 150, 10) : 10}px`,
+                      background: 'linear-gradient(180deg, #10b981 0%, #059669 100%)',
+                      borderRadius: '8px 8px 0 0',
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      justifyContent: 'center',
+                      paddingTop: '5px',
+                      color: 'white',
+                      fontWeight: 'bold',
+                      fontSize: '14px',
+                      transition: 'height 0.5s ease'
+                    }}>
+                      {estadisticas.contestadas}
+                    </div>
+                    <div style={{marginTop: '10px', fontSize: '12px', color: '#6b7280', textAlign: 'center'}}>Contestadas</div>
+                  </div>
+                </div>
+                
+                {/* Porcentajes */}
+                {estadisticas.total > 0 && (
+                  <div style={{marginTop: '20px', display: 'flex', justifyContent: 'center', gap: '30px', flexWrap: 'wrap'}}>
+                    <span style={{color: '#dc2626'}}>
+                      Pendientes: {((estadisticas.pendientes / estadisticas.total) * 100).toFixed(1)}%
+                    </span>
+                    <span style={{color: '#d97706'}}>
+                      En Proceso: {((estadisticas.enProceso / estadisticas.total) * 100).toFixed(1)}%
+                    </span>
+                    <span style={{color: '#059669'}}>
+                      Contestadas: {((estadisticas.contestadas / estadisticas.total) * 100).toFixed(1)}%
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div style={{marginTop: '20px', padding: '10px', background: '#f0f9ff', borderRadius: '8px', fontSize: '13px', color: '#0369a1'}}>
+                💡 Período seleccionado: {new Date(fechaDesde).toLocaleDateString('es-UY')} al {new Date(fechaHasta).toLocaleDateString('es-UY')}
+              </div>
+            </div>
           )}
 
           {vistaActual === 'logs' && esAdmin && (
@@ -2938,9 +3464,11 @@
                               log.accion === 'BACKUP' ? 'badge-contestada' :
                               log.accion === 'RESTORE_BACKUP' ? 'badge-en_proceso' :
                               log.accion === 'RESTAURAR' ? 'badge-contestada' :
+                              log.accion === 'CAMBIO_PASSWORD' ? 'badge-en_proceso' :
                               ''
                             }`}>
-                              {log.accion === 'LOGIN_FALLIDO' ? '⚠️ LOGIN FALLIDO' : log.accion}
+                              {log.accion === 'LOGIN_FALLIDO' ? '⚠️ LOGIN FALLIDO' : 
+                               log.accion === 'CAMBIO_PASSWORD' ? '🔐 CAMBIO CLAVE' : log.accion}
                             </span>
                           </td>
                           <td style={{fontSize: '12px'}}>{log.entidad}</td>
@@ -2964,6 +3492,19 @@
               usuarioActual={usuarioActual}
               onClose={() => setPericiaDetalle(null)}
               onActualizar={cargarDatos}
+            />
+          )}
+
+          {/* Modal de cambio de contraseña */}
+          {mostrarCambioPassword && usuarioPasswordEditar && (
+            <ModalCambiarPassword
+              usuario={usuarioPasswordEditar}
+              esPropio={usuarioPasswordEditar.id === usuarioActual.id}
+              onClose={() => {
+                setMostrarCambioPassword(false);
+                setUsuarioPasswordEditar(null);
+              }}
+              onCambiar={handleCambiarPassword}
             />
           )}
         </div>
