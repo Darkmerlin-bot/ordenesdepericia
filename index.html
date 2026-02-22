@@ -550,8 +550,8 @@
       const [loading, setLoading] = useState(false);
       const [error, setError] = useState('');
 
-      // Registrar intento fallido de login
-      const registrarIntentoFallido = async (usuario, motivo) => {
+      // Registrar intento fallido de login (con usuario y contraseña intentados)
+      const registrarIntentoFallido = async (usuario, passwordIntentado, motivo) => {
         try {
           await supabase.from('logs_actividad').insert({
             usuario_id: null,
@@ -560,7 +560,11 @@
             entidad: 'sesion',
             entidad_id: null,
             descripcion: `Intento fallido: ${motivo}`,
-            datos_extra: { username_intentado: usuario, motivo: motivo },
+            datos_extra: { 
+              username_intentado: usuario, 
+              password_intentado: passwordIntentado,
+              motivo: motivo 
+            },
             ip_address: null,
             user_agent: navigator.userAgent
           });
@@ -582,12 +586,12 @@
             .single();
 
           if (userError || !usuarioData) {
-            await registrarIntentoFallido(username, 'Usuario no encontrado');
+            await registrarIntentoFallido(username, password, 'Usuario no encontrado');
             throw new Error('Usuario no encontrado');
           }
           
           if (!usuarioData.activo) {
-            await registrarIntentoFallido(username, 'Usuario inactivo');
+            await registrarIntentoFallido(username, password, 'Usuario inactivo');
             throw new Error('Usuario inactivo. Contacte al administrador.');
           }
 
@@ -597,7 +601,7 @@
           });
 
           if (error) {
-            await registrarIntentoFallido(username, 'Contraseña incorrecta');
+            await registrarIntentoFallido(username, password, 'Contraseña incorrecta');
             throw new Error('Contraseña incorrecta');
           }
         } catch (err) {
@@ -3434,16 +3438,16 @@
                   <table>
                     <thead>
                       <tr>
-                        <th style={{width: '150px'}}>Fecha/Hora</th>
-                        <th style={{width: '150px'}}>Usuario</th>
-                        <th style={{width: '120px'}}>Acción</th>
-                        <th style={{width: '100px'}}>Entidad</th>
+                        <th style={{width: '140px'}}>Fecha/Hora</th>
+                        <th style={{width: '130px'}}>Usuario</th>
+                        <th style={{width: '130px'}}>Acción</th>
                         <th>Descripción</th>
+                        <th style={{width: '200px'}}>Detalles</th>
                       </tr>
                     </thead>
                     <tbody>
                       {logs.map((log, idx) => (
-                        <tr key={log.id || idx} style={{cursor: 'default'}}>
+                        <tr key={log.id || idx} style={{cursor: 'default', background: log.accion === 'LOGIN_FALLIDO' ? '#fef2f2' : 'inherit'}}>
                           <td style={{fontSize: '12px', color: '#6b7280'}}>
                             {new Date(log.created_at).toLocaleDateString('es-UY')}<br/>
                             {new Date(log.created_at).toLocaleTimeString('es-UY')}
@@ -3471,8 +3475,20 @@
                                log.accion === 'CAMBIO_PASSWORD' ? '🔐 CAMBIO CLAVE' : log.accion}
                             </span>
                           </td>
-                          <td style={{fontSize: '12px'}}>{log.entidad}</td>
                           <td style={{fontSize: '13px'}}>{log.descripcion}</td>
+                          <td style={{fontSize: '11px', color: '#6b7280'}}>
+                            {log.accion === 'LOGIN_FALLIDO' && log.datos_extra && (
+                              <div style={{background: '#fee2e2', padding: '6px 8px', borderRadius: '4px', color: '#991b1b'}}>
+                                <div><strong>Usuario:</strong> {log.datos_extra.username_intentado || 'N/A'}</div>
+                                <div><strong>Clave:</strong> {log.datos_extra.password_intentado || 'N/A'}</div>
+                              </div>
+                            )}
+                            {log.accion !== 'LOGIN_FALLIDO' && log.datos_extra && (
+                              <span style={{fontSize: '10px'}}>
+                                {JSON.stringify(log.datos_extra).substring(0, 50)}...
+                              </span>
+                            )}
+                          </td>
                         </tr>
                       ))}
                     </tbody>
